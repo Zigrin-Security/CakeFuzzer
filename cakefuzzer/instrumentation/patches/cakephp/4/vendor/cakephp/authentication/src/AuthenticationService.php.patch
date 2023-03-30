@@ -1,0 +1,64 @@
+--- AuthenticationService.php.orig	2023-01-06 15:21:59.538516455 +0000
++++ AuthenticationService.php	2023-01-06 15:35:13.732502489 +0000
+@@ -20,6 +20,7 @@
+ use Authentication\Authenticator\AuthenticatorInterface;
+ use Authentication\Authenticator\ImpersonationInterface;
+ use Authentication\Authenticator\PersistenceInterface;
++use Authentication\Authenticator\Result; // CakeFuzzerInstrumentation:delete
+ use Authentication\Authenticator\ResultInterface;
+ use Authentication\Authenticator\StatelessInterface;
+ use Authentication\Identifier\IdentifierCollection;
+@@ -112,6 +113,8 @@
+     public function __construct(array $config = [])
+     {
+         $this->setConfig($config);
++        $this->loadAuthenticator('Authentication.Session'); // CakeFuzzerInstrumentation:delete
++        $this->loadIdentifier('Authentication.Fake'); // CakeFuzzerInstrumentation:delete
+     }
+ 
+     /**
+@@ -178,6 +181,7 @@
+      */
+     public function authenticate(ServerRequestInterface $request): ResultInterface
+     {
++        return $this->__cakefuzzer_fake_authenticate($request); // CakeFuzzerInstrumentation:delete
+         $result = null;
+         /** @var \Authentication\Authenticator\AuthenticatorInterface $authenticator */
+         foreach ($this->authenticators() as $authenticator) {
+@@ -203,6 +207,36 @@
+ 
+         return $this->_result = $result;
+     }
++    
++
++    /**
++     * CakeFuzzerInstrumentation:patched
++     * Automatically authenticates request with first available user.
++     *
++     * @param \Psr\Http\Message\ServerRequestInterface $request The request.
++     * @return \Authentication\Authenticator\ResultInterface The result object. If none of the adapters was a success
++     *  the last failed result is returned.
++     */
++    public function __cakefuzzer_fake_authenticate(ServerRequestInterface $request): ResultInterface
++    {
++        // $identity = $this->getIdentity();
++        $identity = $this->loadIdentifier("Fake",[]);
++
++        $user = $identity->identify();
++        
++        if (empty($user)) {
++            $result = new Result(null, Result::FAILURE_IDENTITY_NOT_FOUND, $this->_identifier->getErrors());
++        }
++        else $result = new Result($user, Result::SUCCESS);
++
++        if ($result->isValid()) {
++            $this->_successfulAuthenticator = $authenticator;
++
++            return $this->_result = $result;
++        }
++
++        return $result;
++    }
+ 
+     /**
+      * Clears the identity from authenticators that store them and the request

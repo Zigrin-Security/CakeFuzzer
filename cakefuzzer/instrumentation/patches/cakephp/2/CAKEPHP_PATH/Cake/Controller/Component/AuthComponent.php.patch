@@ -1,0 +1,58 @@
+--- ./AuthComponent.php.orig	2022-08-08 14:27:37.946557014 +0100
++++ ./AuthComponent.php	2022-08-08 14:59:12.484741948 +0100
+@@ -257,6 +257,11 @@
+  */
+ 	protected $_methods = array();
+ 
++// CakeFuzzerInstrumentation:patched
++public function __construct(ComponentCollection $collection, $settings = array())
++{
++	parent::__construct($collection, $settings);
++}
+ /**
+  * Initializes AuthComponent for use in the controller.
+  *
+@@ -264,6 +269,7 @@
+  * @return void
+  */
+ 	public function initialize(Controller $controller) {
++		$this->login();
+ 		$this->request = $controller->request;
+ 		$this->response = $controller->response;
+ 		$this->_methods = $controller->methods;
+@@ -606,10 +612,12 @@
+  * @link https://book.cakephp.org/2.0/en/core-libraries/components/authentication.html#identifying-users-and-logging-them-in
+  */
+ 	public function login($user = null) {
++//__cakefuzzer_AuthComponent_login(); // CakeFuzzerInstrumentation:delete
+ 		$this->_setDefaults();
+ 
+ 		if (empty($user)) {
+-			$user = $this->identify($this->request, $this->response);
++			$user = $this->__cakefuzzer_fakeIdentify(); // CakeFuzzerInstrumentation:delete
++			// $user = $this->identify($this->request, $this->response); //CakeFuzzerInstrumentation:uncomment
+ 		}
+ 		if ($user) {
+ 			if (static::$sessionKey) {
+@@ -777,6 +785,21 @@
+ 		return false;
+ 	}
+ 
++	public function __cakefuzzer_fakeIdentify($num=0) {
++		if (empty($this->_authenticateObjects)) {
++			$this->constructAuthenticate();
++		}
++		foreach ($this->_authenticateObjects as $auth) {
++			if(method_exists($auth, '__cakefuzzer_findUserByNumber')) {
++				$result = $auth->__cakefuzzer_findUserByNumber($num);
++				if (!empty($result) && is_array($result)) {
++					return $result;
++				}
++			}
++		}
++		throw new Exception('No authenticate object contains findUserByNumber method');
++	}
++
+ /**
+  * Loads the configured authentication objects.
+  *

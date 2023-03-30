@@ -1,0 +1,29 @@
+--- /var/www/cerebrate/vendor/cakephp/cakephp/src/Http/ServerRequest.php.orig	2023-03-16 15:18:22.529738557 +0000
++++ /var/www/cerebrate/vendor/cakephp/cakephp/src/Http/ServerRequest.php	2023-03-16 15:26:19.251790483 +0000
+@@ -982,7 +982,7 @@
+      * @return array
+      * @link https://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
+      */
+-    public function getQueryParams(): array
++    public function getQueryParams()
+     {
+         return $this->query;
+     }
+@@ -1334,7 +1334,7 @@
+      *
+      * @return array<string, mixed> An array of cookie data.
+      */
+-    public function getCookieParams(): array
++    public function getCookieParams()
+     {
+         return $this->cookies;
+     }
+@@ -1438,7 +1438,7 @@
+     public function getEnv(string $key, ?string $default = null): ?string
+     {
+         $key = strtoupper($key);
+-        if (!array_key_exists($key, $this->_environment)) {
++        if (!__cakefuzzer_array_key_exists($key, $this->_environment)) { // CakeFuzzerInstrumentation:patched
+             $this->_environment[$key] = env($key);
+         }
+ 

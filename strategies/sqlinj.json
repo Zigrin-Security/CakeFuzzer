@@ -1,0 +1,19 @@
+{
+    "strategy_name": "SQLInjectionAttackStrategy",
+    "scenarios": [
+        "1`'\"~!@#$%^&*()+__cakefuzzer_sqli_§CAKEFUZZER_PAYLOAD_GUID§__",
+        "2`'\"__cakefuzzer_sqli_§CAKEFUZZER_PAYLOAD_GUID§__"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "LogFilesContentsScanner",
+            "phrase": "(?i)Error: \\[PDOException\\] SQLSTATE\\[[0-9]+\\]: Syntax error or access violation: [0-9]+ You have an error in your SQL syntax; check the manual that corresponds to your [a-zA-Z0-9_-]+ server version for the right syntax to use near '[^\n]*?__cakefuzzer_sqli_§CAKEFUZZER_PAYLOAD_GUID§__",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultErrorsScanner",
+            "phrase": "(?i)Error: \\[PDOException\\] SQLSTATE\\[[0-9]+\\]: Syntax error or access violation: [0-9]+ You have an error in your SQL syntax; check the manual that corresponds to your [a-zA-Z0-9_-]+ server version for the right syntax to use near '[^\n]*?__cakefuzzer_sqli_§CAKEFUZZER_PAYLOAD_GUID§__",
+            "is_regex": true
+        }
+    ]
+}

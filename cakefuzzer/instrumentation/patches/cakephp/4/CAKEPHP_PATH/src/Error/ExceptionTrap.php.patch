@@ -1,0 +1,11 @@
+--- ExceptionTrap.php.orig	2023-03-22 17:41:28.585080511 +0000
++++ ExceptionTrap.php	2023-03-22 17:43:01.047474706 +0000
+@@ -155,7 +155,7 @@
+     protected function chooseRenderer(): string
+     {
+         /** @var class-string<\Cake\Error\ExceptionRendererInterface> */
+-        return PHP_SAPI === 'cli' ? ConsoleExceptionRenderer::class : ExceptionRenderer::class;
++        return PHP_SAPI === 'cli' ? ExceptionRenderer::class : ExceptionRenderer::class; // CakeFuzzerInstrumentation:patched
+     }
+ 
+     /**

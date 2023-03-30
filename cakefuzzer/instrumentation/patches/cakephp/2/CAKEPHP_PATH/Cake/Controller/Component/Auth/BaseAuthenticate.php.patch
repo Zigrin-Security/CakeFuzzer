@@ -1,0 +1,28 @@
+--- ./BaseAuthenticate.php.orig	2022-08-08 14:27:37.998556502 +0100
++++ ./BaseAuthenticate.php	2022-08-08 14:53:50.052164593 +0100
+@@ -144,6 +144,25 @@
+ 		unset($result[$model]);
+ 		return array_merge($user, $result);
+ 	}
++// CakeFuzzerInstrumentation:patched
++	public function __cakefuzzer_findUserByNumber($num=0) {
++		$userModel = $this->settings['userModel'];
++		list(, $model) = pluginSplit($userModel);
++		$userFields = $this->settings['userFields'];
++		if ($password !== null && $userFields !== null) {
++			$userFields[] = $model . '.' . $fields['password'];
++		}
++		$result = ClassRegistry::init($userModel)->find('first', array(
++			'recursive' => $this->settings['recursive'],
++			'fields' => $userFields,
++			'contain' => $this->settings['contain'],
++			'limit' => "$num,1"
++		));
++		$user = $result[$model];
++
++		unset($result[$model]);
++		return array_merge($user, $result);
++	}
+ 
+ /**
+  * Return password hasher object

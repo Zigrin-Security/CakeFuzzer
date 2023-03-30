@@ -1,0 +1,37 @@
+{
+    "strategy_name": "RXSSAttackStrategy",
+    "scenarios": [
+        "<script>alert(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\")</script>",
+        "<script>alert('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__')</script>",
+        ");alert(document.domain);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=(document",
+        "'+alert('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__')+'",
+        "\"+alert(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\")+\""
+    ],
+    "scanners": [
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "[^\n]<script>alert\\(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\"\\)</script>[^\n]",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "[^\n]<script>alert\\('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__'\\)</script>[^\n]",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "[^\n]<script>alert`__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__`</script>[^\n]",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "on[a-zA-Z]+=\"[^\"]{0,100}\\);alert\\(document\\.domain\\);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=\\(document[^\"']{0,100}\\);?\"",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "<script[^>]{0,140}>[^<]*\\+alert\\(('|\")__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__('|\")\\)\\+('|\")",
+            "is_regex": true
+        }
+    ]
+}

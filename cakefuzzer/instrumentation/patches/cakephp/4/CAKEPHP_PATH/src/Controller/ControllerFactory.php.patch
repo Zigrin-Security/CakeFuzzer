@@ -1,0 +1,12 @@
+--- ControllerFactory.php.orig	2023-01-11 18:08:16.074627829 +0000
++++ ControllerFactory.php	2023-01-11 18:09:28.605713078 +0000
+@@ -48,7 +48,8 @@
+     /**
+      * @var \Cake\Controller\Controller
+      */
+-    protected $controller;
++    // protected $controller; // CakeFuzzerInstrumentation:uncomment
++    public $controller; // CakeFuzzerInstrumentation:delete
+ 
+     /**
+      * Constructor

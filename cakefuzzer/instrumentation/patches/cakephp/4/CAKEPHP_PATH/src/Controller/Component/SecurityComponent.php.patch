@@ -1,0 +1,11 @@
+--- SecurityComponent.php.orig	2023-01-06 18:35:01.403850902 +0000
++++ SecurityComponent.php	2023-01-06 18:51:02.667572865 +0000
+@@ -112,7 +112,7 @@
+                 $this->_validatePost($controller);
+             }
+         } catch (SecurityException $se) {
+-            return $this->blackHole($controller, $se->getType(), $se);
++            // return $this->blackHole($controller, $se->getType(), $se); // CakeFuzzerInstrumentation:uncomment
+         }
+ 
+         $request = $this->generateToken($request);

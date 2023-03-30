@@ -1,0 +1,4 @@
+[MASTER]
+disable=
+    C,R,W0511
+extension-pkg-whitelist=pydantic

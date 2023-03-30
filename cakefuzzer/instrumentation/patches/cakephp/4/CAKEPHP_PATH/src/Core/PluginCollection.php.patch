@@ -1,0 +1,12 @@
+--- PluginCollection.php.orig	2023-01-07 14:33:47.070439949 +0000
++++ PluginCollection.php	2023-01-07 14:35:00.925954796 +0000
+@@ -49,7 +49,8 @@
+      *
+      * @var array<string>
+      */
+-    protected $names = [];
++    // protected $names = []; // CakeFuzzerInstrumentation:uncomment
++    public $names = []; // CakeFuzzerInstrumentation:delete
+ 
+     /**
+      * Iterator position stack.

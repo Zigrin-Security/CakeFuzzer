@@ -1,0 +1,12 @@
+--- ./Controller.php.orig	2022-08-08 14:27:38.278553743 +0100
++++ ./Controller.php	2022-08-08 14:58:33.001159548 +0100
+@@ -1268,4 +1268,9 @@
+ 		return new $viewClass($this);
+ 	}
+ 
++// CakeFuzzerInstrumentation:patched
++	public function __cakefuzzer_blackhole() {
++		
++	}
++
+ }

@@ -1,0 +1,25 @@
+{
+    "strategy_name": "DeserializeAttackStrategy",
+    "scenarios": [
+        "O:30:\"CakeFuzzerDeserializationClass\":1:{s:4:\"data\";s:43:\"printf CAKEFUZZER_%s_ §CAKEFUZZER_PAYLOAD_GUID§_\";}",
+        "phar:///cake_fuzzer/cakefuzzer/phpfiles/deserialization/CakeFuzzerDeserializationClass.phar",
+        "phar:///cake_fuzzer/cakefuzzer/phpfiles/deserialization/CakeFuzzerDeserializationClass"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "ResultErrorsScanner",
+            "phrase": "CAKEFUZZER_§CAKEFUZZER_PAYLOAD_GUID§_",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultErrorsScanner",
+            "phrase": "\"marker\": *\"__CAKEFUZZER_DESERIALIZATION__\"[^\\}]*\\}",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "LogFilesContentsScanner",
+            "phrase": "Notice (8): unserialize(): Error at offset",
+            "is_regex": false
+        }
+    ]
+}

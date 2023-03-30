@@ -1,0 +1,39 @@
+{
+    "strategy_name": "CommandInjectionAttackStrategy",
+    "scenarios": [
+        "1;python -c \"import time;time.sleep(1);#__cakefuzzer_§CAKEFUZZER_PAYLOAD_GUID§__\";echo",
+        "1';python -c \"import time;time.sleep(1);#__cakefuzzer_§CAKEFUZZER_PAYLOAD_GUID§__\"",
+        "1\";python -c \"import time;time.sleep(1);#__cakefuzzer_§CAKEFUZZER_PAYLOAD_GUID§__\"",
+        "1|printf CAKEFUZZER_OUTPUT_%s_ §CAKEFUZZER_PAYLOAD_GUID§",
+        "1'|printf CAKEFUZZER_OUTPUT_%s_ §CAKEFUZZER_PAYLOAD_GUID§",
+        "1\"|printf CAKEFUZZER_OUTPUT_%s_ §CAKEFUZZER_PAYLOAD_GUID§",
+        "1;nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_",
+        "1';nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_",
+        "1\";nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_",
+        "1|nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_",
+        "1'|nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_",
+        "1\"|nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "CAKEFUZZER_OUTPUT_§CAKEFUZZER_PAYLOAD_GUID§_",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "LogFilesContentsScanner",
+            "phrase": "sh: 1: nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_: not found",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ResultErrorsScanner",
+            "phrase": "sh: 1: nonexistingcommand_§CAKEFUZZER_PAYLOAD_GUID§_: not found",
+            "is_regex": true
+        },
+        {
+            "scanner_type": "ProcessOutputScanner",
+            "phrase": "python -c import time;time.sleep(1);#__cakefuzzer_§CAKEFUZZER_PAYLOAD_GUID§__",
+            "is_regex": true
+        }
+    ]
+}

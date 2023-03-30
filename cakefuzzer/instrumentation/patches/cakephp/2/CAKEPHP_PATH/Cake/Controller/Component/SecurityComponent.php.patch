@@ -1,0 +1,28 @@
+--- ./SecurityComponent.php.orig	2022-08-08 14:27:38.446552087 +0100
++++ ./SecurityComponent.php	2022-08-08 14:57:08.890050383 +0100
+@@ -41,12 +41,13 @@
+  */
+ 	const DEFAULT_EXCEPTION_MESSAGE = 'The request has been black-holed';
+ 
++// CakeFuzzerInstrumentation:patched
+ /**
+  * The controller method that will be called if this request is black-hole'd
+  *
+  * @var string
+  */
+-	public $blackHoleCallback = null;
++	// public $blackHoleCallback = null; // CakeFuzzerInstrumentation:uncomment
+ 
+ /**
+  * List of controller actions for which a POST request is required
+@@ -886,4 +887,10 @@
+ 		return sprintf($missingMessage, implode(', ', $expectedFieldNames));
+ 	}
+ 
++    public function __set($name, $value) {
++		if($name === 'blackHoleCallback') {
++			$this->$name = '__cakefuzzer_blackhole';
++		}
++		else $this->$name = $value;
++    }
+ }

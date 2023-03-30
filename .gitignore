@@ -1,0 +1,55 @@
+# Virtual environment
+venv/
+venv2/
+venv3/
+my_venv/
+my_venv2/
+
+# Config
+config/config.ini
+
+# Fuzzing results
+outputs/*
+results/*.json
+results.json
+
+# Old
+_old/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.cache
+
+# Django stuff:
+*.log
+*.pot
+
+# Sphinx documentation
+docs/_build/
+
+# local sqlite
+*.db
+*.db-shm
+*.db-wal

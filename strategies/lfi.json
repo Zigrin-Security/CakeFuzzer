@@ -1,0 +1,19 @@
+{
+    "strategy_name": "LFIAttackStrategy",
+    "scenarios": [
+        "/etc/passwd",
+        "../../../../../../../etc/passwd"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "root:x:0:0:root:/root",
+            "is_regex": false
+        },
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "root:x:0:0:root:/root",
+            "is_regex": false
+        }
+    ]
+}

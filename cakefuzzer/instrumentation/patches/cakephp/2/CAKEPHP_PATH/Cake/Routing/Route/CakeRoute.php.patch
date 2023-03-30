@@ -1,0 +1,19 @@
+--- CakeRoute.php.orig	2023-01-20 12:11:12.362568719 +0000
++++ CakeRoute.php	2023-01-20 12:27:32.719454629 +0000
+@@ -322,6 +322,16 @@
+ 				$pass[] = $param;
+ 			}
+ 		}
++        // CakeFuzzerInstrumentation:patched
++        if(class_exists('MagicArrayOrObject')) {
++			global $_CAKEFUZZER_INSTRUMENTOR;
++			$payloads = $_CAKEFUZZER_INSTRUMENTOR->getLoadedPayloads();
++			// TODO: Instrument $pass as well. This will require MagicArrayOrObject to allow strings not arrays as original values.
++			// Also it should be possible to restrict MagicArray to allow only specific types of payload (like just strings or just arrays)
++			// The keys of $pass itself has to be an array because the invokeAction method in Controller.php requires arrays:
++			// 		return $method->invokeArgs($this, $request->params['pass']);
++			$named = new MagicArrayOrObject("_parseArgs_named_args", "", $named, $payloads);
++        }
+ 		return array($pass, $named);
+ 	}
+ 

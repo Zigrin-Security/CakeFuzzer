@@ -1,0 +1,23 @@
+{
+  "strategy_name": "PhpCodeInjectionAttackStrategy",
+  "scenarios": [
+    "__cakefuzzer__codeinjection_§CAKEFUZZER_PAYLOAD_GUID§__;system('id');" 
+],
+  "scanners": [
+    {
+      "scanner_type": "LogFilesContentsScanner",
+      "phrase": "constant __cakefuzzer__codeinjection_§CAKEFUZZER_PAYLOAD_GUID§__ - assumed",
+      "is_regex": true
+    },
+    {
+      "scanner_type": "ResultOutputScanner",
+      "phrase": "__cakefuzzer__codeinjection_§CAKEFUZZER_PAYLOAD_GUID§__uid=",
+      "is_regex": true
+    },
+    {
+      "scanner_type": "ResultOutputScanner",
+      "phrase": "uid=\\d+\\(([^)]+)\\) gid=\\d+\\(([^)]+)\\) groups=\\d+\\(([^)]+)\\)",
+      "is_regex": true
+    }
+  ]
+}
