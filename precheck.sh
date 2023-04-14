@@ -1,37 +1,42 @@
 #!/usr/bin/env bash
 
+sudo apt update
 
-if [ ! -n "$(command -v patch)" ] || [ ! -n "$(command -v sed)" ] || [ ! -n "$(command -v python3.8)" ]
-then
-    if [ -n "$(command -v apt-get)" ]
-    then
-        sudo apt-get update
-        sudo apt-get install -y patch sed python3.8
-    else
-        sudo yum install -y patch sed python3.8
+commands=(patch sed python3-pip)
+python_ver=$(whereis python3 | grep -Eo 'python3\.[0-9]+ ' | sort -u | tail -n 1)
+if [ -z "$python_ver" ]; then
+    # Get latest version of python 3 available in the repository
+    python_ver=$(apt search -qq '^python3\.[0-9]+$' 2>/dev/null| grep -Eo 'python3\.[0-9]+' | tail -n 1)
+    commands+=($python_ver)
+fi
+
+for command in "${commands[@]}"; do
+    if [ ! -n "$(command -v $command)" ]; then
+        if [ -n "$(command -v apt)" ]; then
+            sudo apt install -y -qq $command
+        else
+            sudo yum install -y $command
+        fi
     fi
-fi
-echo "patch installed!"
+done
+
+# Note: Pip will likely be installed in a wrong version
+# Use below in such case with according pip version
+# if [ ! -n "$(command -v pip3.8)" ]
+# then
+#     wget -q https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+#     sudo $python_ver /tmp/get-pip.py
+#     rm /tmp/get-pip.py
+# fi
 
 cd /cake_fuzzer
-
-if [ ! -n "$(command -v pip3.8)" ]
-then
-    wget -q https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-    sudo python3.8 /tmp/get-pip.py
-    rm /tmp/get-pip.py
-fi
-
-cd /cake_fuzzer
-sudo pip3.8 install -q --upgrade virtualenv
-sudo virtualenv -q -p python3.8 venv
+sudo pip3 install -q --upgrade virtualenv
+sudo virtualenv -q -p $python_ver venv
 if [ ! -e venv ]; then
-    python3.8 -m venv venv
+    $python_ver -m venv venv
 fi
 source venv/bin/activate
-echo "venv activated!"
 
-pip3.8 install -qr requirements.txt
-echo "python dependencies installed!"
+pip3 install -qr requirements.txt
 
 echo "setup finished!"
