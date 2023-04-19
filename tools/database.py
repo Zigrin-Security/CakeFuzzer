@@ -33,6 +33,14 @@ class SqliteDatabase(ABC):
         query = f'SELECT json_extract(obj, "$.{field}") as o FROM iterationresult WHERE o LIKE "%{contains}%"'
         return await self._query(query)
 
+    async def get_iteration_field_stats(self, field):
+        query = f'SELECT json_extract(obj, "$.{field}") as field_value, count(*) from IterationResult GROUP BY field_value'
+        result = await self._query(query)
+        formatted = {}
+        for row in result:
+            formatted[row[0]] = row[1]
+        return formatted
+
     async def _query(self, query):
         if self.debug:
             print(query, file=sys.stderr)

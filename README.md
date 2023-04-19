@@ -161,15 +161,10 @@ Finally re-run the fuzzer and all cake_fuzzer running proccess without any SQL I
 ## Installation
 ### Clone respository
 ```
-git clone https://github.com/Zigrin-Security/CakeFuzzer
+git clone https://github.com/Zigrin-Security/CakeFuzzer /cake_fuzzer
 ```
-
-### Move and change name of the cloned Cake Fuzzer folder
 > **Warning**
-> This is important step. Cake Fuzzer won't work properly if it's under different path than `/cake_fuzzer`. Keep in mind that it has to be placed under the root directory of the file system, next `/root`, `/tmp`, and so on.
-```bash
-mv CakeFuzzer/ /cake_fuzzer
-```
+> Cake Fuzzer won't work properly if it's under different path than `/cake_fuzzer`. Keep in mind that it has to be placed under the root directory of the file system, next `/root`, `/tmp`, and so on.
 
 ### Change directory to respository
 ```bash
@@ -187,14 +182,18 @@ source venv/bin/activate
 ```
 
 ## Configuration
+```bash
+cp config/config.example.ini config/config.ini
+```
+
 Configure config/config.ini:
 ```ini
-WEBROOT_DIR="/var/www/MISP/app/webroot"         # Path to the tested applications `webroot` directory
+WEBROOT_DIR="/var/www/html"         # Path to the tested applications `webroot` directory
 CONCURRENT_QUEUES=5                            # [Optional] Number of attacks executed concurretnly at once
 ONLY_PATHS_WITH_PREFIX="/"                      # [Optional] Fuzzer will generates only attacks for attacks starting with this prefix
 EXCLUDE_PATHS=""                                # [Optional] Fuzzer will exlude from scanning all paths that match this regular expression. If it's empty, all paths will be processed
 PAYLOAD_GUID_PHRASE="§CAKEFUZZER_PAYLOAD_GUID§" # [Optional] Internal keyword that is substituted right before attack with unique payload id
-INSTRUMENTATION_INI="config/instrumentation.ini" # [Optional] Path to custom instrumentations of the application.
+INSTRUMENTATION_INI="config/instrumentation_cake4.ini" # [Optional] Path to custom instrumentations of the application.
 ```
 
 ## Execution
