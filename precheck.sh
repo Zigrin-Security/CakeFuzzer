@@ -3,12 +3,13 @@
 sudo apt update
 
 commands=(patch sed python3-pip)
-python_ver=$(whereis python3 | grep -Eo 'python3\.[0-9]+ ' | sort -u | tail -n 1)
+python_ver=$(whereis python3 | grep -Eo 'python3\.[0-9]+ ' | sort -u | tail -n 1|xargs)
 if [ -z "$python_ver" ]; then
     # Get latest version of python 3 available in the repository
     python_ver=$(apt search -qq '^python3\.[0-9]+$' 2>/dev/null| grep -Eo 'python3\.[0-9]+' | tail -n 1)
     commands+=($python_ver)
 fi
+commands+=($python_ver-venv)
 
 for command in "${commands[@]}"; do
     if [ ! -n "$(command -v $command)" ]; then
@@ -20,8 +21,8 @@ for command in "${commands[@]}"; do
     fi
 done
 
-# Note: Pip will likely be installed in a wrong version
-# Use below in such case with according pip version
+# Note: If a wrong version of pip is installed
+# Use below commands to install correct pip version
 # if [ ! -n "$(command -v pip3.8)" ]
 # then
 #     wget -q https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
