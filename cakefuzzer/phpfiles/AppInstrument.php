@@ -49,6 +49,8 @@ class MagicPayloadDictionary implements JsonSerializable {
     protected $_global_probability = null;
     protected $_injected = null;
     protected $_payload_types = array();
+    public $original = null;
+    public $parameters = null;
     public function __construct(
             $name,
             $prefix='',
@@ -441,6 +443,7 @@ class AppInstrument {
         if(empty($_SERVER['REQUEST_METHOD'])) {
             $methods = array('GET', 'POST');
             $_SERVER['REQUEST_METHOD'] = $methods[array_rand($methods)];
+            if($_SERVER['REQUEST_METHOD'] == "POST") $_POST["_method"] = "POST";
         }
 
         # Assign Accept header if not provided. TODO: Move to different part of the code.
@@ -553,6 +556,8 @@ class AppInstrument {
                         else $original = $$global;
                         $prefix = 'HTTP_';
                         break;
+                    default:
+                        if(!empty($$global)) $original = $$global;
                 }
 
                 if($files) $$global = new AccessLoggingArray('_FILES');

@@ -1,5 +1,5 @@
---- AuthenticationService.php.orig	2023-01-06 15:21:59.538516455 +0000
-+++ AuthenticationService.php	2023-01-06 15:35:13.732502489 +0000
+--- AuthenticationService.php.orig	2023-04-19 14:23:51.483136657 +0000
++++ AuthenticationService.php	2023-04-19 14:24:04.883001093 +0000
 @@ -20,6 +20,7 @@
  use Authentication\Authenticator\AuthenticatorInterface;
  use Authentication\Authenticator\ImpersonationInterface;
@@ -25,7 +25,7 @@
          $result = null;
          /** @var \Authentication\Authenticator\AuthenticatorInterface $authenticator */
          foreach ($this->authenticators() as $authenticator) {
-@@ -203,6 +207,36 @@
+@@ -203,6 +207,34 @@
  
          return $this->_result = $result;
      }
@@ -52,8 +52,6 @@
 +        else $result = new Result($user, Result::SUCCESS);
 +
 +        if ($result->isValid()) {
-+            $this->_successfulAuthenticator = $authenticator;
-+
 +            return $this->_result = $result;
 +        }
 +

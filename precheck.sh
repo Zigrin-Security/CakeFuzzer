@@ -38,6 +38,6 @@ if [ ! -e venv ]; then
 fi
 source venv/bin/activate
 
-pip3 install -qr requirements.txt
+sudo pip3 install -qr requirements.txt
 
 echo "setup finished!"
