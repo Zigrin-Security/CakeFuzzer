@@ -8,6 +8,7 @@ from typing import Any, ClassVar, DefaultDict, Iterable, List, Protocol, Tuple, 
 
 import aiofiles
 from pydantic import BaseModel
+from scapy.all import DNS, AsyncSniffer, Packet
 
 from cakefuzzer.attacks.executor import AttackScenario, IterationResult
 from cakefuzzer.domain.interfaces import QueuePut
@@ -52,6 +53,52 @@ class Monitor(ABC):
 class MonitorsGet(Protocol):
     async def get(self, _type: Type[Monitor]) -> Monitor:
         ...
+
+
+class DnsScanner(Scanner, ABC):
+    @abstractmethod
+    async def scan(
+        self,
+        scenario_queue: QueuePut[AttackScenario],
+        registry: VulnerabilitiesAdd,
+        domain: str,
+    ) -> None:
+        pass
+
+
+class DnsMonitor(Monitor):
+    scanners: Iterable[DnsScanner]
+    scanner_type: ClassVar[Type[Scanner]] = DnsScanner
+
+    def start(
+        self, scenario_queue: QueuePut[AttackScenario], registry: VulnerabilitiesAdd
+    ) -> None:
+        def dns_callback(pkt: Packet):
+            if pkt.haslayer(DNS) and pkt.getlayer(DNS).qr == 0:  # DNS query
+                domain = pkt.getlayer(DNS).qd.qname.decode()
+                # print(
+                #     f"DNS Request from {pkt[IP].src}: {domain}"
+                # )
+
+                if self.scanners:
+                    # This has to do for now ... Unfortunately...
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    loop.run_until_complete(
+                        asyncio.gather(
+                            *[
+                                s.scan(scenario_queue, registry, domain)
+                                for s in self.scanners
+                            ]
+                        )
+                    )
+                    loop.close()
+
+        self.sniffer = AsyncSniffer(filter="udp port 53", prn=dns_callback)
+        self.sniffer.start()
+
+    def stop(self) -> None:
+        self.sniffer.stop()
 
 
 class IterationResultScanner(Scanner, ABC):

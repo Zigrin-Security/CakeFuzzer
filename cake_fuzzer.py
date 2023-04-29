@@ -16,6 +16,7 @@ from cakefuzzer.domain.components import (
 from cakefuzzer.instrumentation.info_retriever import AppInfo
 from cakefuzzer.instrumentation.instrumentator import Instrumentator
 from cakefuzzer.instrumentation.route_computer import RouteComputer
+from cakefuzzer.scanners.dns import PhraseDnsScanner
 from cakefuzzer.scanners.filecontents import PhraseFileContentsScanner
 from cakefuzzer.scanners.iteration_result import (
     ResultErrorsScanner,
@@ -321,6 +322,7 @@ async def start_others() -> None:
                         "ProcessOutputScanner": ProcessOutputScanner,
                         "PhraseFileContentsScanner": PhraseFileContentsScanner,
                         "ResultErrorsScanner": ResultErrorsScanner,
+                        "PhraseDnsScanner": PhraseDnsScanner,
                     }
                     kwargs = {
                         "phrase": scanner.phrase,
@@ -397,6 +399,7 @@ async def my_start_others() -> None:
                         "ProcessOutputScanner": ProcessOutputScanner,
                         "PhraseFileContentsScanner": PhraseFileContentsScanner,
                         "ResultErrorsScanner": ResultErrorsScanner,
+                        "PhraseDnsScanner": PhraseDnsScanner,
                     }
                     kwargs = {
                         "phrase": scanner.phrase,
