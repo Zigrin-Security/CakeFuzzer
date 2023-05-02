@@ -1,0 +1,13 @@
+{
+    "strategy_name": "SSRFAttackStrategy",
+    "scenarios": [
+        "http://4glkaunm0gijcgqvo1tfp5617sdj19py.§CAKEFUZZER_PAYLOAD_GUID§.local"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "PhraseDnsScanner",
+            "phrase": "4glkaunm0gijcgqvo1tfp5617sdj19py.§CAKEFUZZER_PAYLOAD_GUID§.local",
+            "is_regex": true
+        }
+    ]
+}
