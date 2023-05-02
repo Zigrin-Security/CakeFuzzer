@@ -28,6 +28,14 @@ class SqliteDatabase(ABC):
         r = await self._query(query)
         return self._parse_json_iteration(r)
 
+    async def get_iteration_by_uid(self, uid):
+        query = f'SELECT obj FROM iterationresult WHERE uid ="{uid}"'
+        r = await self._query(query)
+        r = self._parse_json_iteration(r)
+        if r:
+            return r[0]
+        return {}
+
     async def get_iteration_field(self, field, contains):
         contains = contains.replace('"', '""')
         query = f'SELECT json_extract(obj, "$.{field}") as o FROM iterationresult WHERE o LIKE "%{contains}%"'
