@@ -34,7 +34,7 @@ class PhraseDnsScanner(DnsScanner):
 
         for vulnerability in vulnerabilities:
             print(
-                "Found in file????",
+                "Found DNS request",
                 vulnerability.detection_result,
                 vulnerability.payload_guid,
             )
