@@ -14,6 +14,7 @@ from cakefuzzer.attacks import SuperGlobals
 from cakefuzzer.attacks.executor import AttackScenario, IterationResult
 from cakefuzzer.domain.interfaces import IterationResultGet, QueueGet, QueuePut
 from cakefuzzer.domain.scanners import (
+    DnsMonitor,
     FileContentsMonitor,
     IterationResultsMonitor,
     MonitorsGet,
@@ -137,28 +138,37 @@ class Monitoring:
 
         spinner = Spinner(f"Scanning each {LOOP_TIME}s ")
 
-        while True:
-            start_time = time.time()
-
-            spinner.next()
-
-            ps_monitor = await self.monitors.get(ProcessListMonitor)
-            file_monitor = await self.monitors.get(FileContentsMonitor)
-
-            asyncio.gather(
-                ps_monitor.scan(
-                    scenario_queue=self.scenario_queue, registry=self.registry
-                ),
-                file_monitor.scan(
-                    scenario_queue=self.scenario_queue, registry=self.registry
-                ),
+        try:
+            dns_monitor = await self.monitors.get(DnsMonitor)
+            dns_monitor.start(
+                scenario_queue=self.scenario_queue, registry=self.registry
             )
 
-            await asyncio.sleep(max(0, LOOP_TIME - (time.time() - start_time)))
+            while True:
+                start_time = time.time()
 
-            elapsed = time.time() - start_time
-            if elapsed > LOOP_TIME * 1.1:
-                print(f"periodic {elapsed:.4f}")
+                spinner.next()
+
+                ps_monitor = await self.monitors.get(ProcessListMonitor)
+                file_monitor = await self.monitors.get(FileContentsMonitor)
+
+                asyncio.gather(
+                    ps_monitor.scan(
+                        scenario_queue=self.scenario_queue, registry=self.registry
+                    ),
+                    file_monitor.scan(
+                        scenario_queue=self.scenario_queue, registry=self.registry
+                    ),
+                )
+
+                await asyncio.sleep(max(0, LOOP_TIME - (time.time() - start_time)))
+
+                elapsed = time.time() - start_time
+                if elapsed > LOOP_TIME * 1.1:
+                    print(f"periodic {elapsed:.4f}")
+
+        finally:
+            dns_monitor.stop()
 
 
 async def one_param_per_payload(
