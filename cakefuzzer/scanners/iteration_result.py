@@ -25,11 +25,12 @@ class ResultOutputScanner(IterationResultScanner):
 
         vulnerability_builder = VulnerabilityBuilder(
             phrase=self.phrase,
-            string=outcome,
+            string=result.output.output,
             payload_guid_phrase=self.payload_guid_phrase,
             is_regex=self.is_regex,
         )
         vulnerabilities = vulnerability_builder.get_vulnerability_objects(
+            detection_location=outcome,
             timestamp=time.time(),
             scanner_id=hash(self),
             iteration_result_id=hash(result),  # We cannot get it now, have to wait...
