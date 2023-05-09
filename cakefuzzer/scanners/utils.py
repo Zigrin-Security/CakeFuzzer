@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass
 from typing import Iterator, List, Match
 from uuid import uuid4
+from bs4 import BeautifulSoup
 
 from cakefuzzer.domain.vulnerability import Vulnerability
 
@@ -50,6 +51,7 @@ class VulnerabilityBuilder:
         if match := re.search(phrase, self.string, re.DOTALL):
             return [match]
         return []
+    
 
     def get_vulnerability_objects(self, **kwargs) -> List[Vulnerability]:
         start_time = time.time()
@@ -61,10 +63,13 @@ class VulnerabilityBuilder:
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
+            detection_location = find_html_location(self.string, match.group(0))
+            if(detection_location == []): detection_location = None
             vulnerabilities.append(
                 Vulnerability(
                     detection_result=match.group(0).strip('"'),
                     payload_guid=payload_guid,
+                    detection_location=detection_location,
                     **kwargs,
                 )
             )
@@ -80,3 +85,24 @@ class VulnerabilityBuilder:
                 f.write(self.string)
 
         return vulnerabilities
+
+
+def find_html_location(
+        contents : str,
+        phrase : str,
+        ) -> None:
+    
+    soup = BeautifulSoup(contents, 'html.parser')
+    tags = []
+    for tag in soup.find_all():
+        if phrase in tag.text:
+            tags.append(f"{tag.name}.text")
+        if phrase.lower() in tag.name:
+            # !!! HTML sees "<_" as "&lt;" so it doesnt recognize it as a tag
+            tags.append("tag")
+        for attr, value in tag.attrs.items():
+            if phrase in value:
+                tags.append(f"{tag.name}.{attr}.value")
+            if phrase.lower() in attr:
+                tags.append(f"{tag.name}.attr")
+    return tags

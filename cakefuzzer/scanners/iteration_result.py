@@ -1,6 +1,4 @@
 import time
-import re
-from bs4 import BeautifulSoup
 
 from cakefuzzer.attacks.executor import AttackScenario, IterationResult
 from cakefuzzer.domain.interfaces import QueuePut
@@ -20,9 +18,6 @@ class ResultOutputScanner(IterationResultScanner):
         registry: VulnerabilitiesAdd,
         result: IterationResult,
     ) -> None:
-        
-        outcome = find_html_location(result.output.output, self.phrase)
-
         vulnerability_builder = VulnerabilityBuilder(
             phrase=self.phrase,
             string=result.output.output,
@@ -30,7 +25,6 @@ class ResultOutputScanner(IterationResultScanner):
             is_regex=self.is_regex,
         )
         vulnerabilities = vulnerability_builder.get_vulnerability_objects(
-            detection_location=outcome,
             timestamp=time.time(),
             scanner_id=hash(self),
             iteration_result_id=hash(result),  # We cannot get it now, have to wait...
@@ -38,21 +32,6 @@ class ResultOutputScanner(IterationResultScanner):
 
         for vulnerability in vulnerabilities:
             await registry.add(vulnerability)
-
-def find_html_location(
-        contents : str,
-        phrase : str,
-        ) -> None:
-    
-    soap = BeautifulSoup(contents, 'html.parser')
-    # html sees "<_" as &lt; so it doesnt recognize it as a tag
-    return soap.find_all(lambda tag: 
-                         tag.name and re.findall(pattern=phrase, string=str(tag.name)) or
-                         tag.string and re.findall(pattern=phrase, string=str(tag.string)) or
-                         tag.attrs and all(re.findall(pattern=phrase, string=str(key)) for key in tag.attrs.keys()) or
-                         tag.attrs and all(re.findall(pattern=phrase, string=str(value)) for value in tag.attrs.values())
-                         )
-
 
 
 class ResultErrorsScanner(IterationResultScanner):
