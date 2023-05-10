@@ -52,26 +52,28 @@ class VulnerabilityBuilder:
             return [match]
         return []
 
-    def get_vulnerability_objects(self, **kwargs) -> List[Vulnerability]:
+    def get_vulnerability_objects(self, detect_location = False, **kwargs) -> List[Vulnerability]:
         start_time = time.time()
 
         vulnerabilities = []
         for match in self._find():
+            detection_result=match.group(0).strip('"')
             payload_guid = (
                 match.group("CAKEFUZZER_PAYLOAD_GUID")
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
-            detection_location = (
-                find_html_location(self.string, match.group(0)).__repr__().strip("[]")
-            )
-            if detection_location == "":
-                detection_location = None
+            if detect_location == True:
+                detection_result = (
+                    find_html_location(self.string, match.group(0)).__repr__().strip("[]")
+                )
+                if detection_result == "":
+                    detection_result = None
+
             vulnerabilities.append(
                 Vulnerability(
-                    detection_result=match.group(0).strip('"'),
+                    detection_result=detection_result,
                     payload_guid=payload_guid,
-                    detection_location=detection_location,
                     **kwargs,
                 )
             )
@@ -87,7 +89,7 @@ class VulnerabilityBuilder:
                 f.write(self.string)
 
         return vulnerabilities
-
+    
 
 def find_html_location(
     contents: str,

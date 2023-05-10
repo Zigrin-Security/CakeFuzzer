@@ -21,6 +21,7 @@ from cakefuzzer.scanners.filecontents import PhraseFileContentsScanner
 from cakefuzzer.scanners.iteration_result import (
     ResultErrorsScanner,
     ResultOutputScanner,
+    ContextResultOutputScanner,
 )
 from cakefuzzer.scanners.process import ProcessOutputScanner
 from cakefuzzer.settings import load_webroot_settings
@@ -319,6 +320,7 @@ async def start_others() -> None:
                 else:
                     _type = {
                         "ResultOutputScanner": ResultOutputScanner,
+                        "ContextResultOutputScanner": ContextResultOutputScanner,
                         "ProcessOutputScanner": ProcessOutputScanner,
                         "PhraseFileContentsScanner": PhraseFileContentsScanner,
                         "ResultErrorsScanner": ResultErrorsScanner,
@@ -396,6 +398,7 @@ async def my_start_others() -> None:
                 else:
                     _type = {
                         "ResultOutputScanner": ResultOutputScanner,
+                        "ContextResultOutputScanner": ContextResultOutputScanner,
                         "ProcessOutputScanner": ProcessOutputScanner,
                         "PhraseFileContentsScanner": PhraseFileContentsScanner,
                         "ResultErrorsScanner": ResultErrorsScanner,
