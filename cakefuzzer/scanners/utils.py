@@ -51,7 +51,6 @@ class VulnerabilityBuilder:
         if match := re.search(phrase, self.string, re.DOTALL):
             return [match]
         return []
-    
 
     def get_vulnerability_objects(self, **kwargs) -> List[Vulnerability]:
         start_time = time.time()
@@ -63,8 +62,11 @@ class VulnerabilityBuilder:
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
-            detection_location = find_html_location(self.string, match.group(0))
-            if(detection_location == []): detection_location = None
+            detection_location = (
+                find_html_location(self.string, match.group(0)).__repr__().strip("[]")
+            )
+            if detection_location == "":
+                detection_location = None
             vulnerabilities.append(
                 Vulnerability(
                     detection_result=match.group(0).strip('"'),
@@ -88,11 +90,10 @@ class VulnerabilityBuilder:
 
 
 def find_html_location(
-        contents : str,
-        phrase : str,
-        ) -> None:
-    
-    soup = BeautifulSoup(contents, 'html.parser')
+    contents: str,
+    phrase: str,
+) -> None:
+    soup = BeautifulSoup(contents, "html.parser")
     tags = []
     for tag in soup.find_all():
         if phrase in tag.text:
