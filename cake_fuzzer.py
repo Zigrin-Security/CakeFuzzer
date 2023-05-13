@@ -286,8 +286,6 @@ async def start_others() -> None:
         log_paths = await app_info.log_paths
         cake_path = await app_info.cakephp_path
 
-        # paths = ["Cerebrates/index"]
-
         for definition in defs:
             attacks = [
                 AttackScenario(
