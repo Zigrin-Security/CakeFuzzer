@@ -52,6 +52,13 @@ class AppInfo:
         return output
 
     @property
+    async def paths(self) -> List[str]:
+        """
+        Call '$ app_info.php get_paths'.
+        """
+        return await self._call_app_info(["get_paths"])  # type: ignore
+
+    @property
     async def routes(self) -> List[str]:
         """
         Call '$ app_info.php get_routes'.

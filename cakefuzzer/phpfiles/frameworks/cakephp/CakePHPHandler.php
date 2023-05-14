@@ -162,7 +162,6 @@ class CakePHPHandler {
     protected function _getPathsFromPHPFile($file) {
         $result = array();
         if(basename($file) === "index.php") {
-            $results[] = "/";
             $routes = $this->_GetRoutesAsStringsCommand();
             $controllers = $this->_GetControllersActionsArgumentsCommand();
             // $plugins = $this->_GetAllPluginsCommand();
@@ -224,6 +223,9 @@ class CakePHPHandler {
                     ));
                 }
             }
+        }
+        else {
+            $result[] = "/";
         }
         return $result;
     }

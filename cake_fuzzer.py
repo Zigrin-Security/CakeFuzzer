@@ -75,6 +75,13 @@ async def compute_paths(
     webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
 ) -> List[str]:
     app_info = AppInfo(webroot)
+    return await app_info.paths
+
+
+async def compute_paths_old(
+    webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
+) -> List[str]:
+    app_info = AppInfo(webroot)
     # regexes = await app_info.routes
     # as per discussion in
     # https://github.com/Zigrin-Security/CakeFuzzer/pull/26#issuecomment-1320510117
@@ -280,25 +287,28 @@ async def start_others() -> None:
             only_paths_with_prefix=settings.only_paths_with_prefix,
             exclude_pattern=settings.exclude_paths,
         )
-        print(f"generated {len(paths)} paths")
+        total_paths = sum(len(paths[php_file]) for php_file in paths)
+        print(f"discovered {len(paths)} files to scan with total of {total_paths} paths")
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
         cake_path = await app_info.cakephp_path
 
         for definition in defs:
-            attacks = [
-                AttackScenario(
-                    cake_path=cake_path,
-                    webroot_file=str(settings.index_php),
-                    strategy_name=definition.strategy_name,
-                    payload=payload,
-                    path=path,
-                    total_iterations=32,
-                    payload_guid_phrase=settings.payload_guid_phrase,
-                )
-                for payload, path in itertools.product(definition.scenarios, paths)
-            ]
+            attacks = []
+            for php_file in paths:
+                attacks += [
+                    AttackScenario(
+                        cake_path=cake_path,
+                        webroot_file=str(php_file),
+                        strategy_name=definition.strategy_name,
+                        payload=payload,
+                        path=path,
+                        total_iterations=32,
+                        payload_guid_phrase=settings.payload_guid_phrase,
+                    )
+                    for payload, path in itertools.product(definition.scenarios, paths[php_file])
+                ]
 
             scanners = []
 
