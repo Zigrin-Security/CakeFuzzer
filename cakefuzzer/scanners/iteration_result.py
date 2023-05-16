@@ -62,6 +62,7 @@ class ResultErrorsScanner(IterationResultScanner):
 
 class ContextResultOutputScanner(IterationResultScanner):
     phrase: str
+    context_location: str
     payload_guid_phrase: str
     is_regex: bool = False
 
@@ -79,7 +80,7 @@ class ContextResultOutputScanner(IterationResultScanner):
             is_regex=self.is_regex,
         )
         vulnerabilities = vulnerability_builder.get_vulnerability_objects(
-            detect_location=True,
+            context_location=self.context_location,
             timestamp=time.time(),
             scanner_id=hash(self),
             iteration_result_id=hash(result),  # We cannot get it now, have to wait...

@@ -2,7 +2,7 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from typing import Iterator, List, Match
+from typing import Iterator, List, Match, Optional
 from uuid import uuid4
 from bs4 import BeautifulSoup
 
@@ -52,27 +52,30 @@ class VulnerabilityBuilder:
             return [match]
         return []
 
-    def get_vulnerability_objects(self, detect_location = False, **kwargs) -> List[Vulnerability]:
+    def get_vulnerability_objects(
+        self, context_location: Optional[str] = None, **kwargs
+    ) -> List[Vulnerability]:
         start_time = time.time()
 
         vulnerabilities = []
         for match in self._find():
-            detection_result=match.group(0).strip('"')
+            detection_result = match.group(0).strip('"')
             payload_guid = (
                 match.group("CAKEFUZZER_PAYLOAD_GUID")
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
-            if detect_location == True:
-                detection_result = (
-                    find_html_location(self.string, match.group(0)).__repr__().strip("[]")
-                )
-                if detection_result == "":
-                    detection_result = None
+            if context_location is not None:
+                locations = find_html_location(self.string, match.group(0))
+                
+                # If the context location is not where it should be, skip it
+                if context_location not in locations:
+                    continue
 
             vulnerabilities.append(
                 Vulnerability(
                     detection_result=detection_result,
+                    context_location=context_location,
                     payload_guid=payload_guid,
                     **kwargs,
                 )
@@ -89,7 +92,7 @@ class VulnerabilityBuilder:
                 f.write(self.string)
 
         return vulnerabilities
-    
+
 
 def find_html_location(
     contents: str,
