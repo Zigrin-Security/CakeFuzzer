@@ -9,29 +9,44 @@
     ],
     "scanners": [
         {
-            "scanner_type": "ResultOutputScanner",
-            "phrase": "[^\n]<script>alert\\(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\"\\)</script>[^\n]",
-            "is_regex": true
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "alert\\(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\"\\)",
+            "is_regex": true,
+            "extra": {
+                "context_location": "script.text"
+            }
         },
         {
-            "scanner_type": "ResultOutputScanner",
-            "phrase": "[^\n]<script>alert\\('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__'\\)</script>[^\n]",
-            "is_regex": true
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "alert\\('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__'\\)",
+            "is_regex": true,
+            "extra": {
+                "context_location": "script.text"
+            }
         },
         {
-            "scanner_type": "ResultOutputScanner",
-            "phrase": "[^\n]<script>alert`__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__`</script>[^\n]",
-            "is_regex": true
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "alert`__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__`",
+            "is_regex": true,
+            "extra": {
+                "context_location": "script.text"
+            }
         },
         {
-            "scanner_type": "ResultOutputScanner",
+            "scanner_type": "ContextResultOutputScanner",
             "phrase": "on[a-zA-Z]+=\"[^\"]{0,100}\\);alert\\(document\\.domain\\);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=\\(document[^\"']{0,100}\\);?\"",
-            "is_regex": true
+            "is_regex": true,
+            "extra": {
+                "context_location": "script.text"
+            }
         },
         {
-            "scanner_type": "ResultOutputScanner",
+            "scanner_type": "ContextResultOutputScanner",
             "phrase": "<script[^>]{0,140}>[^<]*\\+alert\\(('|\")__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__('|\")\\)\\+('|\")",
-            "is_regex": true
+            "is_regex": true,
+            "extra": {
+                "context_location": "script.text"
+            }
         }
     ]
 }
