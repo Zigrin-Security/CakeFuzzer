@@ -4,6 +4,7 @@ class AppInfo {
     private $_command = "";
     private $_output_format = null;
     private $_app_handler = null;
+    private $_web_root = "";
     private $_index_path = "";
     private $_app_vars = array();
 
@@ -17,6 +18,7 @@ class AppInfo {
 
         // Parse index
         $this->_index_path = $this->_getIndex($_SERVER['argv'][1]);
+        $this->_web_root = $_SERVER['argv'][1];
 
         // Parse output format
         $this->_output_format = "json";
@@ -148,7 +150,7 @@ class AppInfo {
             return array(
                 'get_routes', 'get_controllers', 'get_components',
                 'get_actions', 'get_controllers_actions_arguments', 'get_plugins',
-                'get_log_paths', 'get_users', 'get_db_info', 'get_cakephp_info'
+                'get_log_paths', 'get_users', 'get_db_info', 'get_cakephp_info', 'get_paths'
             );
         }
         return array_keys($this->_app_handler->available_commands);

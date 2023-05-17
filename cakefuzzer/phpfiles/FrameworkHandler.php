@@ -13,6 +13,7 @@ class FrameworkHandler {
     }
 
     public function getFrameworkVersion() {
+        // Consider using Configure::version()
         $framework_path = $this->_framework_path ? $this->_framework_path : CORE_PATH;
         $cake_version = "";
         $version_path = $this->_searchFileInDir($framework_path, 'VERSION.txt');

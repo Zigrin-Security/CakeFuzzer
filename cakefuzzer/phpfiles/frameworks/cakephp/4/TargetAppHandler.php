@@ -21,7 +21,7 @@ class TargetAppHandler extends CakePHPHandler {
             'get_plugins' => '_GetAllPluginsCommand',
             'get_components' => '_GetAllComponentsCommand',
             'get_actions' => '_GetAllActionsCommand',
-            'get_controllers_actions_arguments' => '_getControllersActionsArgumentsCommand',
+            'get_controllers_actions_arguments' => '_GetControllersActionsArgumentsCommand',
             'get_log_paths' => '_GetLogPathsCommand',
             'get_users' => '_GetUsersCommand',
             'get_db_info' => '_GetDBInfoCommand'
@@ -141,7 +141,7 @@ class TargetAppHandler extends CakePHPHandler {
      * 
      * @return array
      */
-    protected function _getControllersActionsArgumentsCommand() {
+    protected function _GetControllersActionsArgumentsCommand() {
         $all_info = array();
         $controllers = $this->_GetAllControllersCommand();
         foreach($controllers as $controller) {

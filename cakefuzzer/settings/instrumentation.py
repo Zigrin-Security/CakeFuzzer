@@ -31,7 +31,7 @@ class GlobFunctionOverrideInstrumentation(BaseModel):
                 new_function_name=self.new_function_name,
                 semaphore=semaphore,
             )
-            for pathname in glob.glob(self.glob, recursive=True)
+            for pathname in glob.glob(self.glob, recursive=True) if os.path.isfile(pathname)
         ]
 
         contains = await asyncio.gather(

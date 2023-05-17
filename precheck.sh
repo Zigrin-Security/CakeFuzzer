@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt update
+sudo apt -qq update
 
 commands=(patch sed python3-pip)
 python_ver=$(whereis python3 | grep -Eo 'python3\.[0-9]+ ' | sort -u | tail -n 1|xargs)
