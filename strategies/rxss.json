@@ -37,7 +37,7 @@
             "phrase": "on[a-zA-Z]+=\"[^\"]{0,100}\\);alert\\(document\\.domain\\);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=\\(document[^\"']{0,100}\\);?\"",
             "is_regex": true,
             "extra": {
-                "context_location": "script.text"
+                "context_location": "*.on*.value"
             }
         },
         {
