@@ -36,7 +36,7 @@ class Instrumentator:
         return await self.settings.file_overrides
 
     async def _load_annotations_removal(self) -> List[Instrumentation]:
-        return await self.settings.remove_annotations
+        return self.settings.remove_annotations
 
     async def _load_cake_version_patches(self, major_version: int) -> None:
         version_dir = self.settings.patch_dir / "cakephp" / str(major_version)

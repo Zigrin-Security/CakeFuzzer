@@ -2,7 +2,7 @@
 
 spl_autoload_register(function ($class) {
     if (0 === strpos($class, 'PhpParser\\')) {
-        $filename = __DIR__ . '/php-parser/lib/' . str_replace('\\', '/', $class) . '.php';
+        $filename = getcwd() . '/php-parser/lib/' . str_replace('\\', '/', $class) . '.php';
         if (file_exists($filename)) {
             require_once $filename;
         }
