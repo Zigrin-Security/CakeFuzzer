@@ -12,6 +12,7 @@ from cakefuzzer.instrumentation.override import (
     contains_any,
 )
 from cakefuzzer.instrumentation.patch import PatchInstrumentation
+from cakefuzzer.instrumentation.remove_annotations import RemoveAnnotationsInstrumentation
 
 
 class GlobFunctionOverrideInstrumentation(BaseModel):
@@ -57,6 +58,7 @@ class InstrumentationSettings(BaseSettings):
     patches: List[PatchInstrumentation] = []
     copies: List[CopyInstrumentation] = []
     overrides: List[GlobFunctionOverrideInstrumentation] = []
+    remove_annotations: List[RemoveAnnotationsInstrumentation] = []
     concurrent_limit: int = 100
 
     @property

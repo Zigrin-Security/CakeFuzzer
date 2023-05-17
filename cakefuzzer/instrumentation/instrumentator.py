@@ -35,6 +35,9 @@ class Instrumentator:
     async def _load_settings_overrides(self) -> List[Instrumentation]:
         return await self.settings.file_overrides
 
+    async def _load_annotations_removal(self) -> List[Instrumentation]:
+        return await self.settings.remove_annotations
+
     async def _load_cake_version_patches(self, major_version: int) -> None:
         version_dir = self.settings.patch_dir / "cakephp" / str(major_version)
 
@@ -115,6 +118,7 @@ class Instrumentator:
 
         settings_patches = await self._load_settings_patches()
         settings_overrides = await self._load_settings_overrides()
+        annotations_removal = await self._load_annotations_removal()
         settings_copies = self.settings.copies
 
         app_info = AppInfo(self.webroot_dir)
@@ -129,10 +133,16 @@ class Instrumentator:
             settings_overrides,
             settings_patches + cake_patches,
             settings_copies + cake_copies,
+            annotations_removal,
         )
 
     async def apply(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
+        (
+            overrides,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
 
         _, unapplied = await check(*overrides)
         unapplied = await apply(*unapplied)
@@ -146,8 +156,21 @@ class Instrumentator:
         unapplied = await apply(*unapplied)
         print("Copies Applied", len(unapplied))
 
+        _, unapplied = await check(*annotation_removal)
+        unapplied = await apply(*unapplied)
+        print("Annotations Removed", len(unapplied))
+
     async def revert(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
+        (
+            overrides,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
+
+        applied, _ = await check(*annotation_removal)
+        await revert(*applied)
+        print("Annotations Reverted", len(applied))
 
         applied, _ = await check(*overrides)
         await revert(*applied)
@@ -162,7 +185,12 @@ class Instrumentator:
         print("Copies Reverted", len(applied))
 
     async def is_applied(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
+        (
+            overrides,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
 
         applied, unapplied = await check(*overrides)
         print("Applied / Unapplied")
@@ -173,3 +201,6 @@ class Instrumentator:
 
         applied, unapplied = await check(*copies)
         print(f"Copies: {len(applied)}/{len(unapplied)}")
+
+        applied, unapplied = await check(*annotation_removal)
+        print(f"Annotations: {len(applied)}/{len(unapplied)}")
