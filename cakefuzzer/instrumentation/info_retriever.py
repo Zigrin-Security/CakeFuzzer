@@ -52,7 +52,7 @@ class AppInfo:
         return output
 
     @property
-    async def paths(self) -> List[str]:
+    async def paths(self) -> Dict[str, List[str]]:
         """
         Call '$ app_info.php get_paths'.
         """

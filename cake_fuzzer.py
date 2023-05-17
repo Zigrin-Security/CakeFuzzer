@@ -3,7 +3,7 @@ import itertools
 import re
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import typer
 
@@ -73,7 +73,7 @@ def add_fuzzable_actions(actions):
 
 async def compute_paths(
     webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
-) -> List[str]:
+) -> Dict[str, List[str]]:
     app_info = AppInfo(webroot)
     return await app_info.paths
 
@@ -288,7 +288,9 @@ async def start_others() -> None:
             exclude_pattern=settings.exclude_paths,
         )
         total_paths = sum(len(paths[php_file]) for php_file in paths)
-        print(f"discovered {len(paths)} files to scan with total of {total_paths} paths")
+        print(
+            f"discovered {len(paths)} files to scan with total of {total_paths} paths"
+        )
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
@@ -307,7 +309,9 @@ async def start_others() -> None:
                         total_iterations=32,
                         payload_guid_phrase=settings.payload_guid_phrase,
                     )
-                    for payload, path in itertools.product(definition.scenarios, paths[php_file])
+                    for payload, path in itertools.product(
+                        definition.scenarios, paths[php_file]
+                    )
                 ]
 
             scanners = []
