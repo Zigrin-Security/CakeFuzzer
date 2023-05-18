@@ -431,7 +431,6 @@ class AppInstrument {
 
     protected function _parseConfig($config) {
         global $_CakeFuzzerPayloadGUIDs;
-        if(!empty($config['cake_path'])) $this->_loadAppHandler($config['cake_path']);
         // Assign static super globals according to the config
         if(isset($config['super_globals'])) foreach($config['super_globals'] as $global => $values) {
             global $$global;
@@ -501,11 +500,11 @@ class AppInstrument {
         }
     }
 
-    private function _loadAppHandler($framework_path=null) {
+    private function _loadAppHandler() {
         if(!is_null($this->_app_handler)) return true;
 
         include "FrameworkLoader.php";
-        $loader = new FrameworkLoader(dirname($this->_webroot_file), 'get_framework_info', array(), $framework_path);
+        $loader = new FrameworkLoader(dirname($this->_webroot_file), 'get_framework_info', array());
         if(!$loader->isFrameworkSupported()) {
             logError(get_class($this), "The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
             return false;
@@ -570,6 +569,53 @@ class AppInstrument {
         error_reporting(-1);
         ini_set('display_errors', 'On');
         include $this->_webroot_file;
+    }
+
+    public function handleExit() {
+        global $_CAKEFUZZER_OUTPUT_SENT;
+        $this->_loadAppHandler();
+        if(!$_CAKEFUZZER_OUTPUT_SENT) {
+            $results = $this->_prepareResults();
+            $_CAKEFUZZER_OUTPUT_SENT = true;
+            print(json_encode($results)."\n");
+        }
+    }
+
+    private function _prepareResults() {
+        global $_ResponseHeaders, $_CAKEFUZZER_PATH, $_CakeFuzzerPayloadGUIDs, $_CakeTimer, $_CAKEFUZZER_INSTRUMENTOR;
+        $output = ob_get_clean();
+        while(ob_get_level()) $output .= ob_get_clean();
+        // if(ob_get_length() !== false) ob_end_clean();
+    
+        if($_GET instanceof MagicArray) $get = $_GET->getCopy();
+        else $get = $_GET;
+        if($_POST instanceof MagicArray) $post = $_POST->getCopy();
+        else $post = $_POST;
+        if($_REQUEST instanceof MagicArray) $request = $_REQUEST->getCopy();
+        else $request = $_REQUEST;
+        if($_COOKIE instanceof MagicArray) $cookie = $_COOKIE->getCopy();
+        else $cookie = $_COOKIE;
+        if($_FILES instanceof MagicArray) $files = $_FILES->getCopy();
+        else $files = $_FILES;
+        if($_SERVER instanceof MagicArray) $server = $_SERVER->getCopy();
+        else $server = $_SERVER;
+    
+        $result = array(
+            'first_http_line' => $_ResponseHeaders->GetFirstLine(),
+            'method' => $_SERVER['REQUEST_METHOD'],
+            'path' => $_CAKEFUZZER_INSTRUMENTOR->updatePath($_CAKEFUZZER_PATH),
+            'headers' => $_ResponseHeaders->GetAllHeaders(),
+            'output' => $output,
+            '_GET' => $get,
+            '_POST' => $post,
+            '_REQUEST' => $request,
+            '_COOKIE' => $cookie,
+            '_FILES' => $files,
+            '_SERVER' => $server,
+            'PAYLOAD_GUIDs' => $_CakeFuzzerPayloadGUIDs->GetPayloadGUIDs(),
+            'exec_time' => $_CakeTimer->FinishTimer(true)
+        );
+        return $result;
     }
 
     public function getLoadedPayloads() {

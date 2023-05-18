@@ -3,17 +3,15 @@
 class FrameworkLoader {
     private $_web_root = "";
     private $_frameworks_path = "";
-    private $_framework_path = null;
     private $_framework_handler = null;
     private $_supported_frameworks = array();
     private $_language_version = "";
 
-    public function __construct($web_root, $command, $app_vars=array(), $framework_path = null) {
+    public function __construct($web_root, $command, $app_vars=array()) {
         $this->_web_root = $web_root;
         $this->_language_version = phpversion();
         $this->_frameworks_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . "frameworks";
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->_frameworks_path);
-        if(!is_null($framework_path)) $this->_framework_path = $framework_path;
         $this->_framework_handler = $this->_loadFrameworkHandler($command, $app_vars);
         $this->_framework_handler->SetAppFrameworkVersion();
     }

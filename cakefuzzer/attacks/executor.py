@@ -1,7 +1,6 @@
 import asyncio
 import hashlib
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
@@ -33,7 +32,6 @@ class SingleExecutorErrors(BaseModel):
 
 
 class SingleExecutorConfig(BaseModel):
-    framework_path: Path
     webroot_file: str
     strategy_name: str
     path: str
@@ -131,7 +129,6 @@ async def exec_single_executor(
 
 class AttackScenario(BaseModel):
     strategy_name: str
-    framework_path: Path
     webroot_file: str
     path: str
     payload: str
@@ -155,7 +152,6 @@ class AttackScenario(BaseModel):
     @property
     def config(self) -> SingleExecutorConfig:
         config = SingleExecutorConfig(
-            framework_path=self.framework_path,
             webroot_file=self.webroot_file,
             strategy_name=self.strategy_name,
             # 'includes': self.getInstrumentation('App').getIncludesList()  # TODO?

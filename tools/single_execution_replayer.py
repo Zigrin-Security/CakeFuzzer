@@ -39,7 +39,6 @@ class IterationHandler:
 
         from_scenario = {
             "PAYLOAD_GUID_phrase": None,
-            "framework_path": None,
             "webroot_file": None,
             "injectable": None,
             "strategy_name": None,
