@@ -5,28 +5,14 @@
         "<script>alert('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__')</script>",
         ");alert(document.domain);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=(document",
         "'+alert('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__')+'",
-        "\"+alert(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\")+\""
+        "\"+alert(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\")+\"",
+        "<CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§>",
+        "__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__"
     ],
     "scanners": [
         {
             "scanner_type": "ContextResultOutputScanner",
-            "phrase": "alert\\(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\"\\)",
-            "is_regex": true,
-            "extra": {
-                "context_location": "script.text"
-            }
-        },
-        {
-            "scanner_type": "ContextResultOutputScanner",
-            "phrase": "alert\\('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__'\\)",
-            "is_regex": true,
-            "extra": {
-                "context_location": "script.text"
-            }
-        },
-        {
-            "scanner_type": "ContextResultOutputScanner",
-            "phrase": "alert`__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__`",
+            "phrase": "__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__",
             "is_regex": true,
             "extra": {
                 "context_location": "script.text"
@@ -46,6 +32,30 @@
             "is_regex": true,
             "extra": {
                 "context_location": "script.text"
+            }
+        },
+        {
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§",
+            "is_regex": true,
+            "extra": {
+                "context_location": "tag"
+            }
+        },
+        {
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__",
+            "is_regex": true,
+            "extra": {
+                "context_location": "*.attr"
+            }
+        },
+        {
+            "scanner_type": "ContextResultOutputScanner",
+            "phrase": "__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__",
+            "is_regex": true,
+            "extra": {
+                "context_location": "*.*.value"
             }
         }
     ]
