@@ -388,6 +388,7 @@ class AppInstrument {
     private $_attack_target = array();
     private $_attack_exclude = array();
     private $_attack_skip_keys = array();
+    private $_options = array();
 
     public function __construct($config) {
         if(!$this->_configVerify($config)) die;
@@ -480,7 +481,8 @@ class AppInstrument {
 
         if(!empty($config['known_keywords'])) $payloads = array_unique(array_merge($payloads, $config['known_keywords']));
 
-        $this->initialize($config['webroot_file'], $payloads, $injectable, $targets, $exclude, $fuzz_skip_keys, $options);
+        $this->_webroot_file = $config['webroot_file'];
+        $this->initialize($payloads, $injectable, $targets, $exclude, $fuzz_skip_keys, $options);
     }
 
     protected function _cleanGlobal($global) {
@@ -499,24 +501,22 @@ class AppInstrument {
         }
     }
 
-    private function _loadAppHandler($cake_path=null) {
+    private function _loadAppHandler($framework_path=null) {
         if(!is_null($this->_app_handler)) return true;
 
-        include "FrameworkHandler.php";
-        $fh = new FrameworkHandler($cake_path);
-        if(!$fh->isFrameworkSupported()) {
-            logError(get_class($this), "Framework '{$fh->getFrameworkName()}' is not supported.");
+        include "FrameworkLoader.php";
+        $loader = new FrameworkLoader(dirname($this->_webroot_file), 'get_framework_info', array(), $framework_path);
+        if(!$loader->isFrameworkSupported()) {
+            logError(get_class($this), "The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
             return false;
         }
 
-        // Specifying command and empty array below is a hack. Should be rewritten to something more clear
-        // and generic for both AppInfo.php and AppInstrument.php
-        $this->_app_handler = $fh->loadTargetAppHandler('get_cakephp_info', $fh->getFrameworkVersion(), array());
+        // Consider merging this method with AppInfo
+        $this->_app_handler = $loader->getAppHandler();
         return true;
     }
 
-    public function initialize($webroot_file, $payloads, $injectable = null, $target = null, $exclude = null, $fuzz_skip_keys = null, $options = array()) {
-        $this->_webroot_file = $webroot_file;
+    public function initialize($payloads, $injectable = null, $target = null, $exclude = null, $fuzz_skip_keys = null, $options = array()) {
         $this->_payloads = $payloads;
         if(!empty($injectable)) $this->_injectable = $injectable;
         if(is_array($target)) $this->_attack_target = $target; // TODO: Not implemented

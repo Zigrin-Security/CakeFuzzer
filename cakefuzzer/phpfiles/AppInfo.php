@@ -63,14 +63,14 @@ class AppInfo {
     private function _loadAppHandler() {
         if(!is_null($this->_app_handler)) return true;
 
-        include "FrameworkHandler.php";
-        $fh = new FrameworkHandler();
-        if(!$fh->isFrameworkSupported()) {
-            $this->_error("Framework '{$fh->getFrameworkName()}' is not supported.");
+        include "FrameworkLoader.php";
+        $loader = new FrameworkLoader($this->_web_root, $this->_command, $this->_app_vars);
+        if(!$loader->isFrameworkSupported()) {
+            $this->_error("The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
             return false;
         }
 
-        $this->_app_handler = $fh->loadTargetAppHandler($this->_command, $fh->getFrameworkVersion(), $this->_app_vars);
+        $this->_app_handler = $loader->getAppHandler();
         return true;
     }
 
@@ -150,7 +150,7 @@ class AppInfo {
             return array(
                 'get_routes', 'get_controllers', 'get_components',
                 'get_actions', 'get_controllers_actions_arguments', 'get_plugins',
-                'get_log_paths', 'get_users', 'get_db_info', 'get_cakephp_info', 'get_paths'
+                'get_log_paths', 'get_users', 'get_db_info', 'get_framework_info', 'get_paths'
             );
         }
         return array_keys($this->_app_handler->available_commands);
