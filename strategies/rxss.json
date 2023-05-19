@@ -20,7 +20,7 @@
         },
         {
             "scanner_type": "ContextResultOutputScanner",
-            "phrase": "on[a-zA-Z]+=\"[^\"]{0,100}\\);alert\\(document\\.domain\\);a__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__=\\(document[^\"']{0,100}\\);?\"",
+            "phrase": "__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__",
             "is_regex": true,
             "extra": {
                 "context_location": "*.on*.value"
