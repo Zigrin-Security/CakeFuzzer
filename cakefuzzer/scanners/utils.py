@@ -77,7 +77,7 @@ class VulnerabilityBuilder:
             vulnerabilities.append(
                 Vulnerability(
                     detection_result=detection_result,
-                    detection_location=detection_location.__repr__().strip("[]"),
+                    context_location=detection_location.__repr__().strip("[]"),
                     payload_guid=payload_guid,
                     **kwargs,
                 )
