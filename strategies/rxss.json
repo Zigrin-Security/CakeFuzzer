@@ -55,7 +55,7 @@
             "phrase": "javascript:__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__",
             "is_regex": true,
             "extra": {
-                "context_location": "*.*.value"
+                "context_location": "a.href.value"
             }
         }
     ]
