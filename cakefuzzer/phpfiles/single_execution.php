@@ -19,6 +19,10 @@ function usage() {
 
 function get_config_definition() {
     $config = array(
+        'web_root' => array(
+            'type' => 'string',
+            'required' => true
+        ),
         'webroot_file' => array(
             'type' => 'string',
             'required' => true
@@ -121,5 +125,7 @@ ob_start();
 
 unset($data, $config);
 
-$_CAKEFUZZER_INSTRUMENTOR->includeApp();
+error_reporting(-1);
+ini_set('display_errors', 'On');
+include $_CAKEFUZZER_INSTRUMENTOR->getWebRootFile();
 $_CAKEFUZZER_INSTRUMENTOR->handleExit(); // If app did not run exit/die then run it manually

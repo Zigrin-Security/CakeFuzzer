@@ -27,22 +27,6 @@ class CakePHP4AppHandler extends CakePHPHandler {
     }
 
     /**
-     * Handle app_info commands for CakePHP 4
-     *
-     * @return bool
-     */
-    public function CommandHandler($args) {
-        $result = parent::CommandHandler($args);
-        if($result === false) return;
-        if(is_array($result)) return $result;
-
-        if(in_array($this->_command, array_keys($this->available_commands))) {
-            return $this->{$this->available_commands[$this->_command]}();
-        }
-        return $this->_CommandNotFound($this->_command);
-    }
-
-    /**
      * Get regular expressions of all available route definitions
      * Router::getRouteCollection()
      *

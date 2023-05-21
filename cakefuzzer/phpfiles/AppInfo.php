@@ -19,6 +19,12 @@ class AppInfo {
         // Parse index
         $this->_index_path = $this->_getIndex($_SERVER['argv'][1]);
         $this->_web_root = $_SERVER['argv'][1];
+        if(!is_dir($this->_web_root)) {
+            $this->_info($this->_web_root." was not found");
+            return false;
+        }
+        set_include_path(get_include_path() . PATH_SEPARATOR . $this->_web_root);
+        chdir($this->_web_root);
 
         // Parse output format
         $this->_output_format = "json";
@@ -37,16 +43,15 @@ class AppInfo {
         $this->_info("Example: php app_info.php /var/www/MISP/app/webroot/ get_controllers raw");
     }
 
-    public function includeApp() {
-        // Below are three just in case there are some ob_get_clean inside the application
-        ob_start();
-        ob_start();
-        ob_start();
-        include $this->_index_path;
-        $output = ob_get_clean();
-        while(ob_get_level()) $output .= ob_get_clean();
-        $app_vars = get_defined_vars();
-        unset($app_vars['output']);
+    public function getIndex() {
+        return $this->_index_path;
+    }
+
+    public function setAppVars($app_vars) {
+        $keyword = "_CakeFuzzer";
+        $to_remove = array("_GET", "_POST", "_COOKIE", "_FILES", "_ENV", "_REQUEST", "_SERVER", "argv", "argc", "GLOBALS");
+        foreach($to_remove as $key) if(isset($app_vars[$key])) unset($app_vars[$key]);
+        foreach($app_vars as $key=>$val) if(strlen($key)>strlen($keyword) && substr($key, 0, strlen($keyword)) === $keyword) unset($app_vars[$key]);
         $this->_app_vars = $app_vars;
     }
 
@@ -64,9 +69,14 @@ class AppInfo {
         if(!is_null($this->_app_handler)) return true;
 
         include "FrameworkLoader.php";
-        $loader = new FrameworkLoader($this->_web_root, $this->_command, $this->_app_vars);
-        if(!$loader->isFrameworkSupported()) {
-            $this->_error("The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
+        try {
+            $loader = new FrameworkLoader($this->_web_root, $this->_command, $this->_app_vars);
+            if(!$loader->isFrameworkSupported()) {
+                $this->_error("The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
+                return false;
+            }
+        } catch(Exception $e) {
+            $this->_error($e->getMessage());
             return false;
         }
 

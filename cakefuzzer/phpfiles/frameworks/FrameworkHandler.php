@@ -16,6 +16,7 @@ class FrameworkHandler {
     protected $_web_root = null;
     // Manually typed Framework classes used by app_info
     public $required_classes = array();
+    public $required_constants = array();
 
     public function __construct($web_root, $command, $app_vars) {
         $this->_web_root = $web_root;
@@ -69,7 +70,7 @@ class FrameworkHandler {
     }
 
     /**
-     * Prehandler for app_info commands
+     * Handle app_info commands
      *
      * @return bool
      */
@@ -101,7 +102,7 @@ class FrameworkHandler {
         // foreach($target_app_args as $arg) {
         //     var_dump($arg);
         // }
-        return true;
+        return $this->_CommandNotFound($this->_command);
     }
 
     /**

@@ -382,6 +382,7 @@ class AppInstrument {
     // Dynamic application instrumentation.
     // Overwrites superglobal variables and provides more control of their access.
     private $_app_handler = null;
+    private $_web_root = null;
     private $_webroot_file = null;
     private $_payloads = array();
     private $_injectable = null;
@@ -403,12 +404,18 @@ class AppInstrument {
             die;
         }
 
+        if(empty($config['web_root'])) {
+            $warnings[] = "Provide the 'web_root' configuration option.";
+        }
+        else if(!is_dir($config['web_root'])) {
+            $warnings[] = "File ${config['web_root']} does not exist or is not a directory. Provide a correct path to your webroot directory";
+        }
+
         if(empty($config['webroot_file'])) {
             $warnings[] = "Provide the 'webroot_file' configuration option.";
         }
-
-        if(!file_exists($config['webroot_file'])) {
-            $warnings[] = "File ${config['webroot_file']} does not exist. Provide a correct path to your CakePHP webroot directory";
+        else if(!file_exists($config['webroot_file'])) {
+            $warnings[] = "File ${config['webroot_file']} does not exist. Provide a correct path to php file to fuzz.";
         }
 
         if(empty($config['payloads'])) {
@@ -480,6 +487,9 @@ class AppInstrument {
 
         if(!empty($config['known_keywords'])) $payloads = array_unique(array_merge($payloads, $config['known_keywords']));
 
+        $this->_web_root = $config['web_root'];
+        chdir($this->_web_root); // This is required if the app does "include './file.php'
+        
         $this->_webroot_file = $config['webroot_file'];
         $this->initialize($payloads, $injectable, $targets, $exclude, $fuzz_skip_keys, $options);
     }
@@ -504,9 +514,14 @@ class AppInstrument {
         if(!is_null($this->_app_handler)) return true;
 
         include "FrameworkLoader.php";
-        $loader = new FrameworkLoader(dirname($this->_webroot_file), 'get_framework_info', array());
-        if(!$loader->isFrameworkSupported()) {
-            logError(get_class($this), "The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
+        try {
+            $loader = new FrameworkLoader($this->_web_root, 'get_framework_info', array());
+            if(!$loader->isFrameworkSupported()) {
+                logError(get_class($this), "The application is based on unsupported framework. Supported frameworks: ".implode(", ",$loader->GetSupportedFrameworks()));
+                return false;
+            }
+        } catch(Exception $e) {
+            logError(get_class($this), $e->getMessage());
             return false;
         }
 
@@ -565,10 +580,8 @@ class AppInstrument {
         }
     }
 
-    public function includeApp() {
-        error_reporting(-1);
-        ini_set('display_errors', 'On');
-        include $this->_webroot_file;
+    public function getWebRootFile() {
+        return $this->_webroot_file;
     }
 
     public function handleExit() {
@@ -582,7 +595,7 @@ class AppInstrument {
     }
 
     private function _prepareResults() {
-        global $_ResponseHeaders, $_CAKEFUZZER_PATH, $_CakeFuzzerPayloadGUIDs, $_CakeTimer, $_CAKEFUZZER_INSTRUMENTOR;
+        global $_CakeFuzzerResponseHeaders, $_CAKEFUZZER_PATH, $_CakeFuzzerPayloadGUIDs, $_CakeFuzzerTimer, $_CAKEFUZZER_INSTRUMENTOR;
         $output = ob_get_clean();
         while(ob_get_level()) $output .= ob_get_clean();
         // if(ob_get_length() !== false) ob_end_clean();
@@ -601,10 +614,10 @@ class AppInstrument {
         else $server = $_SERVER;
     
         $result = array(
-            'first_http_line' => $_ResponseHeaders->GetFirstLine(),
+            'first_http_line' => $_CakeFuzzerResponseHeaders->GetFirstLine(),
             'method' => $_SERVER['REQUEST_METHOD'],
             'path' => $_CAKEFUZZER_INSTRUMENTOR->updatePath($_CAKEFUZZER_PATH),
-            'headers' => $_ResponseHeaders->GetAllHeaders(),
+            'headers' => $_CakeFuzzerResponseHeaders->GetAllHeaders(),
             'output' => $output,
             '_GET' => $get,
             '_POST' => $post,
@@ -613,7 +626,7 @@ class AppInstrument {
             '_FILES' => $files,
             '_SERVER' => $server,
             'PAYLOAD_GUIDs' => $_CakeFuzzerPayloadGUIDs->GetPayloadGUIDs(),
-            'exec_time' => $_CakeTimer->FinishTimer(true)
+            'exec_time' => $_CakeFuzzerTimer->FinishTimer(true)
         );
         return $result;
     }

@@ -1,5 +1,6 @@
 <?php
-include 'FrameworkHandler.php';
+if(!class_exists("FrameworkHandler")) include 'FrameworkHandler.php';
+
 class CakePHPHandler extends FrameworkHandler{
     /**
      * Sets the version of the framework supported by the handler class.

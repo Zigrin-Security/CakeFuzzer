@@ -21,22 +21,6 @@ class CakePHP2AppHandler extends CakePHPHandler {
     }
 
     /**
-     * Handle app_info commands for CakePHP 2.
-     *
-     * @return bool
-     */
-    public function CommandHandler($args) {
-        $result = parent::CommandHandler($args);
-        if($result === false) return;
-        if(is_array($result)) return $result;
-
-        if(in_array($this->_command, array_keys($this->available_commands))) {
-            return $this->{$this->available_commands[$this->_command]}();
-        }
-        return $this->_CommandNotFound($this->_command);
-    }
-
-    /**
      * Return updated path with named parameters fuzzed
      * Example: /controller/action/param1:val1/param2[key1]:val2/param2[key2]:val3
      */

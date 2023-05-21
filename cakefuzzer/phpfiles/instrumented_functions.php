@@ -167,15 +167,15 @@ if (!class_exists('CakeFuzzerObjectsRegistry')) {
     }
 }
 
-$_ResponseHeaders = new CakeFuzzerHeaders();
+$_CakeFuzzerResponseHeaders = new CakeFuzzerHeaders();
 $_CakeFuzzerPayloadGUIDs = new CakeFuzzerPayloadGUIDs();
-$_CakeTimer = new CakeFuzzerTimer(true);
+$_CakeFuzzerTimer = new CakeFuzzerTimer(true);
 $_CakeFuzzerFuzzedObjects = new CakeFuzzerObjectsRegistry();
 
 if(!function_exists('__cakefuzzer_header')) {
     function __cakefuzzer_header($header, $replace = true, $response_code = 0) {
-        global $_ResponseHeaders;
-        $_ResponseHeaders->AddHeader($header, $replace, $response_code);
+        global $_CakeFuzzerResponseHeaders;
+        $_CakeFuzzerResponseHeaders->AddHeader($header, $replace, $response_code);
         header($header, $replace, $response_code);
     }
 }
