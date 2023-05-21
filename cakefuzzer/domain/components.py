@@ -192,6 +192,7 @@ async def one_param_per_payload(
                     continue
 
                 new_attack = AttackScenario(
+                    web_root=scenario.web_root,
                     webroot_file=scenario.webroot_file,
                     strategy_name=scenario.strategy_name,
                     payload=scenario.payload,

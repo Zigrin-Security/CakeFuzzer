@@ -316,6 +316,7 @@ async def start_others() -> None:
             for php_file in paths:
                 attacks += [
                     AttackScenario(
+                        web_root=str(settings.webroot_dir),
                         webroot_file=str(php_file),
                         strategy_name=definition.strategy_name,
                         payload=payload,
