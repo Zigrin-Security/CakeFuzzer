@@ -19,6 +19,10 @@ function usage() {
 
 function get_config_definition() {
     $config = array(
+        'framework_handler' => array(
+            'type' => 'string',
+            'required' => true
+        ),
         'web_root' => array(
             'type' => 'string',
             'required' => true
@@ -109,8 +113,6 @@ $_CAKEFUZZER_OUTPUT_SENT = false;
 
 include 'instrumented_functions.php';
 include 'AppInstrument.php';
-
-$_CAKEFUZZER_PATH = __cake_fuzzer_prepare_path($config);
 
 $_CAKEFUZZER_INSTRUMENTOR = new AppInstrument($config);
 $_CAKEFUZZER_INSTRUMENTOR->reinitializeGlobals();

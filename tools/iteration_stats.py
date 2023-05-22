@@ -26,12 +26,14 @@ class StatsExtractor:
     async def calculate_stats(self):
         global GROUPS
         for group in GROUPS:
-            self.stats[GROUPS[group]] = await self.database.get_iteration_field_stats(group)
+            self.stats[GROUPS[group]] = await self.database.get_iteration_field_stats(
+                group
+            )
         return self.stats
 
     def print_stats(self, print_format="json"):
         if print_format == "json":
-            print(json.dumps(self.stats))
+            print(json.dumps(self.stats, indent=4))
             return
 
 
@@ -47,7 +49,9 @@ async def main():
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Return statistics about scan iteration_results database")
+    parser = argparse.ArgumentParser(
+        description="Return statistics about scan iteration_results database"
+    )
     parser.add_argument(
         "-d",
         "--database",

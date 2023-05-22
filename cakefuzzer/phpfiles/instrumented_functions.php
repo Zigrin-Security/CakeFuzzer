@@ -166,11 +166,10 @@ if (!class_exists('CakeFuzzerObjectsRegistry')) {
         }
     }
 }
-
-$_CakeFuzzerResponseHeaders = new CakeFuzzerHeaders();
-$_CakeFuzzerPayloadGUIDs = new CakeFuzzerPayloadGUIDs();
-$_CakeFuzzerTimer = new CakeFuzzerTimer(true);
-$_CakeFuzzerFuzzedObjects = new CakeFuzzerObjectsRegistry();
+if(!isset($_CakeFuzzerResponseHeaders)) $_CakeFuzzerResponseHeaders = new CakeFuzzerHeaders();
+if(!isset($_CakeFuzzerPayloadGUIDs)) $_CakeFuzzerPayloadGUIDs = new CakeFuzzerPayloadGUIDs();
+if(!isset($_CakeFuzzerTimer)) $_CakeFuzzerTimer = new CakeFuzzerTimer(true);
+if(!isset($_CakeFuzzerFuzzedObjects)) $_CakeFuzzerFuzzedObjects = new CakeFuzzerObjectsRegistry();
 
 if(!function_exists('__cakefuzzer_header')) {
     function __cakefuzzer_header($header, $replace = true, $response_code = 0) {
@@ -195,6 +194,11 @@ if (!function_exists("__cakefuzzer_is_magic_in_arrays")) {
     }
 }
 
+if (!function_exists("__cakefuzzer_is_array")) {
+    function __cakefuzzer_is_array($value) {
+        return is_array($value) || $value instanceof MagicArray;
+    }
+}
 if (!function_exists("__cakefuzzer_array_merge")) {
     function __cakefuzzer_array_merge(...$objects) {
         $noMagicArray = true;

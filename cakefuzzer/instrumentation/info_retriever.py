@@ -94,6 +94,14 @@ class AppInfo:
         return await self._call_app_info(["get_plugins", "raw"])  # type: ignore
 
     @property
+    async def framework_handler(self) -> str:
+        """
+        Call '$ app_info.php get_framework_info json'.
+        """
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return output["framework_handler"]
+
+    @property
     async def framework_path(self) -> Path:
         """
         Call '$ app_info.php get_framework_info json'.

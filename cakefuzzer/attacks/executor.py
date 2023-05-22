@@ -36,6 +36,7 @@ class SingleExecutorErrors(BaseModel):
 
 
 class SingleExecutorConfig(BaseModel):
+    framework_handler: str
     web_root: str
     webroot_file: str
     strategy_name: str
@@ -134,6 +135,8 @@ async def exec_single_executor(
 
 class AttackScenario(BaseModel):
     strategy_name: str
+    framework_handler: str
+    web_root: str
     webroot_file: str
     path: str
     payload: str
@@ -157,6 +160,7 @@ class AttackScenario(BaseModel):
     @property
     def config(self) -> SingleExecutorConfig:
         config = SingleExecutorConfig(
+            framework_handler=self.framework_handler,
             web_root=self.web_root,
             webroot_file=self.webroot_file,
             strategy_name=self.strategy_name,

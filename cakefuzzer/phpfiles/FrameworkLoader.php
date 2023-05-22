@@ -7,25 +7,30 @@ class FrameworkLoader {
     private $_supported_frameworks = array();
     private $_language_version = "";
 
-    public function __construct($web_root, $command, $app_vars=array()) {
+    public function __construct($web_root, $command, $app_vars=array(), $framework_handler="") {
         $this->_web_root = $web_root;
         $this->_language_version = phpversion();
         $this->_frameworks_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . "frameworks";
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->_frameworks_path);
-        $this->_framework_handler = $this->_loadFrameworkHandler($command, $app_vars);
+        $this->_framework_handler = $this->_loadFrameworkHandler($command, $app_vars, $framework_handler);
         $this->_framework_handler->SetAppFrameworkVersion();
     }
 
-    private function _loadFrameworkHandler($command, $app_vars) {
+    private function _loadFrameworkHandler($command, $app_vars, $framework_handler="") {
         $handler_files = $this->_searchFilesInDir($this->_frameworks_path, "AppHandler.php", True);
         foreach($handler_files as $file) {
             $class_name = substr(basename($file), 0, strlen(basename($file))-4);
             if(!class_exists($class_name)) include $file;
+            // If the framework_handler was provided this specific one should be used without checking
+            // This is because single_execution does this before the target app is included (loaded)
+            if($framework_handler !== "" && $class_name === $framework_handler) {
+                return new $class_name($this->_web_root, $command, $app_vars);
+            }
             $handler = new $class_name($this->_web_root, $command, $app_vars);
             $this->_supported_frameworks[] = $handler->GetFrameworkName();
             if($handler->CheckIfFrameworkIsLoaded()) return $handler;
         }
-        throw new ErrorException("Framework Handler was not properly loaded. Framework use by the application is not supported");
+        throw new ErrorException("Framework Handler ".$framework_handler!==""?"($framework_handler) ":""."was not properly loaded. Framework use by the application is not supported");
     }
 
     public function GetSupportedFrameworks() {

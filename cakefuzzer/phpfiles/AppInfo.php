@@ -160,7 +160,7 @@ class AppInfo {
             return array(
                 'get_routes', 'get_controllers', 'get_components',
                 'get_actions', 'get_controllers_actions_arguments', 'get_plugins',
-                'get_log_paths', 'get_users', 'get_db_info', 'get_framework_info', 'get_paths'
+                'get_log_paths', 'get_users', 'get_db_info', 'get_framework_info', 'get_paths', 'get_settings'
             );
         }
         return array_keys($this->_app_handler->available_commands);

@@ -74,7 +74,7 @@ class FrameworkHandler {
      *
      * @return bool
      */
-    public function CommandHandler($args) {
+    public function CommandHandler($args=array()) {
         // Interrupts exit calls to extract information about the application
 
         // This is needed because sometimes exit and shutdown functions are both executed without app actually exitting
@@ -128,6 +128,16 @@ class FrameworkHandler {
     }
 
     /**
+     * Conducts framework custom preparation before fuzzing.
+     * To be overwritten by child classes
+     *
+     * @return bool True if success, false otherwise.
+     */
+    public function PrepareFuzzing() {
+        return True;
+    }
+
+    /**
      * Get missing Framework classes
      *
      * @return array
@@ -159,6 +169,7 @@ class FrameworkHandler {
      */
     protected function _GetFrameworkInfoCommand() {
         $info = array(
+            "framework_handler" => get_class($this),
             'framework_name' => $this->_framework_name,
             'framework_path' => "",
             'framework_version' => $this->_supported_framework_version,

@@ -310,12 +310,14 @@ async def start_others() -> None:
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
+        framework_handler = await app_info.framework_handler
 
         for definition in defs:
             attacks = []
             for php_file in paths:
                 attacks += [
                     AttackScenario(
+                        framework_handler=framework_handler,
                         web_root=str(settings.webroot_dir),
                         webroot_file=str(php_file),
                         strategy_name=definition.strategy_name,
@@ -388,12 +390,13 @@ async def my_start_others() -> None:
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
-
-        # paths = ["Cerebrates/index"]
+        framework_handler = await app_info.framework_handler
 
         for definition in defs:
             attacks = [
                 AttackScenario(
+                    framework_handler=framework_handler,
+                    web_root=str(settings.webroot_dir),
                     webroot_file=str(settings.index_php),
                     strategy_name=definition.strategy_name,
                     payload=payload,

@@ -13,6 +13,7 @@ class CakePHPHandler extends FrameworkHandler{
             $this->_app_framework_version = Configure::version();
             return True;
         }
+        if(!defined("CORE_PATH")) return False;
         $version_path = $this->_searchFileInDir(CORE_PATH, 'VERSION.txt');
         if(file_exists($version_path)) {
             $pattern = "/^[0-9]+\.[0-9]+\.[0-9]+$/m";
@@ -53,6 +54,7 @@ class CakePHPHandler extends FrameworkHandler{
         if(defined('APP')) $app_dir = APP;
 
         $info = array(
+            "framework_handler" => get_class($this),
             'framework_name' => $this->_framework_name,
             'framework_version' => $this->_app_framework_version,
             'framework_path' => CORE_PATH,
@@ -68,7 +70,7 @@ class CakePHPHandler extends FrameworkHandler{
             $routes = $this->_GetRoutesAsStringsCommand();
             $controllers = $this->_GetControllersActionsArgumentsCommand();
             // $plugins = $this->_GetAllPluginsCommand();
-            $routes = array($routes[count($routes)-1]); // Dev Temp. To do: Remove
+            $routes = array($routes[count($routes)-1]); // Dev Temp. TODO: Remove when all types of routes are handled
             foreach($routes as $route) {
                 if($route[0] === $route[-1]) $route = substr($route, 1, -1); // Removing regex markers
                 if($route[0] === "^") $route = substr($route, 1); // Removing route beginning
