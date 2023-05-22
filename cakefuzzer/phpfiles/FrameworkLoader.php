@@ -51,13 +51,6 @@ class FrameworkLoader {
         return $this->_framework_handler;
     }
 
-    // public function loadTargetAppHandler($command, $app_vars=array()) {
-    //     if(is_null($this->_framework_handler)) throw new ErrorException("Framework Handler was not properly loaded");
-    //     $this->_framework_handler->SetCommand($command);
-    //     $this->_framework_handler->SetAppVars($app_vars);
-    //     return $this->_framework_handler;
-    // }
-
     private function _searchFilesInDir($directory, $file_name, $ends_with = False) {
         $dir = new RecursiveDirectoryIterator($directory);
         $filter = new \RecursiveCallbackFilterIterator($dir, function ($current, $key, $iterator) use ($file_name, $ends_with) {
