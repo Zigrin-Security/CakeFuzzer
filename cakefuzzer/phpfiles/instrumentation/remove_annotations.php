@@ -27,9 +27,6 @@ if (!is_dir($directory)) {
     exit(1);
 }
 
-$directoryIterator = new RecursiveDirectoryIterator($directory);
-$iterator = new RecursiveIteratorIterator($directoryIterator);
-$phpFiles = new RegexIterator($iterator, '/\.php$/i', RecursiveRegexIterator::GET_MATCH);
 
 // Construct the iterator
 $it = new RecursiveDirectoryIterator($directory);
