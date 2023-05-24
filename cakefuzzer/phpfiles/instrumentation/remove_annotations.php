@@ -39,7 +39,6 @@ foreach(new RecursiveIteratorIterator($it) as $file) {
     }
 
     $inputFile = $file->getPathname();
-    print("Processing {$inputFile}\n");
     $preAnnotationFile = $inputFile . '.preannotation';
 
     // Rename the original file
