@@ -28,14 +28,6 @@
         },
         {
             "scanner_type": "ContextResultOutputScanner",
-            "phrase": "<script[^>]{0,140}>[^<]*\\+alert\\(('|\")__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__('|\")\\)\\+('|\")",
-            "is_regex": true,
-            "extra": {
-                "context_location": "script.text"
-            }
-        },
-        {
-            "scanner_type": "ContextResultOutputScanner",
             "phrase": "CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§",
             "is_regex": true,
             "extra": {
