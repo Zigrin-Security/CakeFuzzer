@@ -21,6 +21,7 @@ from cakefuzzer.scanners.filecontents import PhraseFileContentsScanner
 from cakefuzzer.scanners.iteration_result import (
     ResultErrorsScanner,
     ResultOutputScanner,
+    ContextResultOutputScanner,
 )
 from cakefuzzer.scanners.process import ProcessOutputScanner
 from cakefuzzer.settings import load_webroot_settings
@@ -345,6 +346,21 @@ async def start_others() -> None:
                             )
                         )
 
+                elif scanner.scanner_type == "ContextResultOutputScanner":
+                    if scanner.extra is None or "context_location" not in scanner.extra:
+                        raise ValueError(
+                            "ContextResultOutputScanner requires extra.context_location"
+                        )
+
+                    scanners.append(
+                        ContextResultOutputScanner(
+                            phrase=scanner.phrase,
+                            context_location=scanner.extra["context_location"],
+                            payload_guid_phrase=settings.payload_guid_phrase,
+                            is_regex=scanner.is_regex,
+                        )
+                    )
+
                 else:
                     _type = {
                         "ResultOutputScanner": ResultOutputScanner,
@@ -420,6 +436,21 @@ async def my_start_others() -> None:
                                 is_regex=scanner.is_regex,
                             )
                         )
+
+                elif scanner.scanner_type == "ContextResultOutputScanner":
+                    if scanner.extra is None or "context_location" not in scanner.extra:
+                        raise ValueError(
+                            "ContextResultOutputScanner requires extra.context_location"
+                        )
+
+                    scanners.append(
+                        ContextResultOutputScanner(
+                            phrase=scanner.phrase,
+                            context_location=scanner.extra["context_location"],
+                            payload_guid_phrase=settings.payload_guid_phrase,
+                            is_regex=scanner.is_regex,
+                        )
+                    )
 
                 else:
                     _type = {
