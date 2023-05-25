@@ -1,12 +1,12 @@
 <?php
 
-include "cakephp/CakePHPHandler.php";
+if(!class_exists("CakePHPHandler")) include "CakePHP/CakePHPHandler.php";
 
-class TargetAppHandler extends CakePHPHandler {
-    public function __construct($command, $version, $app_vars) {
-        parent::__construct($command, $version, $app_vars);
+class CakePHP2AppHandler extends CakePHPHandler {
+    public function __construct($web_root, $command, $app_vars) {
+        parent::__construct($web_root, $command, $app_vars);
         $this->required_classes = array(
-            'App', 'Router', 'CakeLog', 'ClassRegistry' ,'ConnectionManager'
+            'App', 'Router', 'CakeLog', 'ClassRegistry', 'Configure', 'ConnectionManager'
         );
         
         $commands = array(
@@ -15,28 +15,9 @@ class TargetAppHandler extends CakePHPHandler {
             'get_plugins' => '_GetAllPluginsCommand',
             'get_components' => '_GetAllComponentsCommand',
             'get_actions' => '_GetAllActionsCommand',
-            'get_controllers_actions_arguments' => '_getControllersActionsArgumentsCommand',
-            'get_log_paths' => '_GetLogPathsCommand',
-            'get_users' => '_GetUsersCommand',
-            'get_db_info' => '_GetDBInfoCommand'
+            'get_controllers_actions_arguments' => '_GetControllersActionsArgumentsCommand'
         );
         $this->available_commands = array_merge($this->available_commands, $commands);
-    }
-
-    /**
-     * Handle app_info commands for CakePHP 2.
-     *
-     * @return bool
-     */
-    public function CommandHandler($args) {
-        $result = parent::CommandHandler($args);
-        if($result === false) return;
-        if(is_array($result)) return $result;
-
-        if(in_array($this->_command, array_keys($this->available_commands))) {
-            return $this->{$this->available_commands[$this->_command]}();
-        }
-        return $this->_CommandNotFound($this->_command);
     }
 
     /**
@@ -143,7 +124,7 @@ class TargetAppHandler extends CakePHPHandler {
             // var_dump($route->defaults['controller']);
             $str_routes[] = $route->compile();
         }
-        $str_routes = array_unique($str_routes);
+        $str_routes = array_values(array_unique($str_routes));
         return $str_routes;
     }
 
@@ -214,7 +195,7 @@ class TargetAppHandler extends CakePHPHandler {
      * 
      * @return array
      */
-    protected function _getControllersActionsArgumentsCommand() {
+    protected function _GetControllersActionsArgumentsCommand() {
         $all_info = array();
         $controllers = $this->_GetAllControllersCommand();
         foreach($controllers as $controller) {

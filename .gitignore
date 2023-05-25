@@ -16,6 +16,9 @@ results.json
 # Old
 _old/
 
+# IDE
+*\.code-workspace
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

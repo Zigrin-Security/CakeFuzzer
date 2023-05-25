@@ -1,7 +1,6 @@
 import asyncio
 import hashlib
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
@@ -15,6 +14,10 @@ class SuperGlobalsConfig(BaseModel):
 
 class SkipFuzzingKeysConfig(BaseModel):
     SERVER: List[str] = Field(alias="_SERVER")
+    GET: List[str] = Field(alias="_GET")
+    POST: List[str] = Field(alias="_POST")
+    COOKIE: List[str] = Field(alias="_COOKIE")
+    FILES: List[str] = Field(alias="_FILES")
 
 
 class SingleExecutorOutput(SuperGlobals):
@@ -33,7 +36,8 @@ class SingleExecutorErrors(BaseModel):
 
 
 class SingleExecutorConfig(BaseModel):
-    cake_path: Path
+    framework_handler: str
+    web_root: str
     webroot_file: str
     strategy_name: str
     path: str
@@ -84,7 +88,7 @@ async def exec_single_executor(
     config: SingleExecutorConfig,
 ) -> Tuple[SingleExecutorOutput, SingleExecutorErrors]:
     proc = await asyncio.create_subprocess_exec(
-        *["php", "cakefuzzer/phpfiles/single_execution.php", config.webroot_file],
+        *["php", "cakefuzzer/phpfiles/single_execution.php"],
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -131,7 +135,8 @@ async def exec_single_executor(
 
 class AttackScenario(BaseModel):
     strategy_name: str
-    cake_path: Path
+    framework_handler: str
+    web_root: str
     webroot_file: str
     path: str
     payload: str
@@ -155,7 +160,8 @@ class AttackScenario(BaseModel):
     @property
     def config(self) -> SingleExecutorConfig:
         config = SingleExecutorConfig(
-            cake_path=self.cake_path,
+            framework_handler=self.framework_handler,
+            web_root=self.web_root,
             webroot_file=self.webroot_file,
             strategy_name=self.strategy_name,
             # 'includes': self.getInstrumentation('App').getIncludesList()  # TODO?
@@ -178,7 +184,43 @@ class AttackScenario(BaseModel):
                     "HTTP_CONTENT_ENCODING",
                     "HTTP_X_HTTP_METHOD_OVERRIDE",
                     "HTTP_AUTHORIZATION",
-                ]
+                ],
+                _GET=[
+                    "_GET",
+                    "_POST",
+                    "_SERVER",
+                    "_COOKIE",
+                    "_FILES",
+                    "_ENV",
+                    "GLOBALS",
+                ],
+                _POST=[
+                    "_GET",
+                    "_POST",
+                    "_SERVER",
+                    "_COOKIE",
+                    "_FILES",
+                    "_ENV",
+                    "GLOBALS",
+                ],
+                _COOKIE=[
+                    "_GET",
+                    "_POST",
+                    "_SERVER",
+                    "_COOKIE",
+                    "_FILES",
+                    "_ENV",
+                    "GLOBALS",
+                ],
+                _FILES=[
+                    "_GET",
+                    "_POST",
+                    "_SERVER",
+                    "_COOKIE",
+                    "_FILES",
+                    "_ENV",
+                    "GLOBALS",
+                ],
             ),  # TODO: extract?
             oneParamPerPayload=False,  # TODO: Config
             iterations=self.total_iterations,
