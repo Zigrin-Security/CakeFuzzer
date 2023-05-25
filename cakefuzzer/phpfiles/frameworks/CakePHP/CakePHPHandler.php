@@ -1,171 +1,76 @@
 <?php
-class CakePHPHandler {
-    public $executed = false;
-    public $available_commands = array('get_cakephp_info'=>'_GetCakePHPInfoCommand', 'get_paths'=>'_GetPathsCommand');
-    protected $_command = "";
-    protected $_cake_version = "";
-    protected $_app_vars = array();
-    // Manually typed CakePHP classes used by app_info
-    public $required_classes = array();
+if(!class_exists("FrameworkHandler")) include 'FrameworkHandler.php';
 
-    public function __construct($command, $version, $app_vars) {
-        $this->_command = $command;
-        $this->_cake_version = $version;
-        $this->_app_vars = $app_vars;
-    }
-
+class CakePHPHandler extends FrameworkHandler{
     /**
-     * Prehandler for app_info commands
+     * Sets the version of the framework supported by the handler class.
      *
      * @return bool
      */
-    public function CommandHandler($args) {
-        // Interrupts exit calls to extract information about CakePHP application
-
-        // This is needed because sometimes exit and shutdown functions are both executed without app actually exitting
-        if($this->executed) {
-            return false;
+    public function SetAppFrameworkVersion() {
+        if($this->_app_framework_version !== "") return True;
+        if(class_exists("Configure")) {
+            $this->_app_framework_version = Configure::version();
+            return True;
         }
-        $this->executed = true;
-
-        if(in_array($this->_command, array_keys($this->available_commands))) return $this->{$this->available_commands[$this->_command]}();
-        if(!in_array($this->_command, array_keys($this->available_commands))) return $this->_CommandNotFound($this->_command);
-
-        // Check if all CakePHP components are properly loaded
-        if(!$this->_CheckIfCakeIsLoaded()) {
-            $result = array('error' => 'CakePHP was not loaded properly. Missing CakePHP classes: '.implode(', ', $this->_GetMissingCakeObjects()));
-            return $result;
+        if(!defined("CORE_PATH")) return False;
+        $version_path = $this->_searchFileInDir(CORE_PATH, 'VERSION.txt');
+        if(file_exists($version_path)) {
+            $pattern = "/^[0-9]+\.[0-9]+\.[0-9]+$/m";
+            $f_content = file_get_contents($version_path);
+            preg_match($pattern, $f_content, $matches);
+            if(count($matches) > 0) $this->_app_framework_version = $matches[0];
         }
-
-        // Clean all previous app output
-        // ob_start();
-        // $output = ob_get_clean();
-        // ob_end_clean();
-
-        // $target_app_args = func_get_args();
-        // foreach($target_app_args as $arg) {
-        //     var_dump($arg);
-        // }
-        return true;
+        return $this->_app_framework_version !== "";
     }
-
+    
     /**
-     * Return updated path with fuzzed parameters.
-     * Frameworks might add meanings to different parts of the URL.
-     * Example for CakePHP 2: /controller/action/param1:val1/param2:val2
-     * Specific Framework handler should overwrite this method, fuzz those params and reconstruct the URL
-     */
-    public function updatePath($path) {
-        return $path;
-    }
-
-    /**
-     * Check if a specific class, array of classes, or all required CakePHP classes
+     * Check if a specific class, array of classes, or all required Framework classes
      * are available.
      * @param mixed $class Class, array of classes, or null
      *
      * @return bool
      */
-    protected function _CheckIfCakeIsLoaded($class = null) {
+    public function CheckIfFrameworkIsLoaded($class = null) {
         if(is_string($class)) return class_exists($class);
-        if(is_null($class)) $class = $this->required_classes;
-        if(is_array($class)) {
-            $classes = $class;
+        if(is_null($class)) $classes = $this->required_classes;
+        if(is_array($classes)) {
             foreach($classes as $class) {
                 if(!class_exists($class)) return false;
             }
+            // TODO: Add here version verification
             return true;
         }
     }
 
     /**
-     * Get missing CakePHP classes
-     *
-     * @return array
-     */
-    protected function _GetMissingCakeObjects() {
-        $missing = array();
-        foreach($this->required_classes as $class) {
-            if(!$this->_CheckIfCakeIsLoaded($class)) $missing[] = $class;
-        }
-        return $missing;
-    }
-
-    /**
-     * Return error message about not existing command
-     * @param string Command that does not exist.
-     *
-     * @return array array('error' => 'Error message')
-     */
-    protected function _CommandNotFound($command = '') {
-        $msg = 'Provided command not found';
-        if(!empty($command)) $msg .= ': '.$command;
-        return array('error' => $msg);
-    }
-
-    /**
-     * Get information about CakePHP such as version and filesystem path.
+     * Get information about the Framework such as version and filesystem path.
      * Tested for CakePHP: 2 and 4
      *
      * @return array
      */
-    protected function _GetCakePHPInfoCommand() {
+    protected function _GetFrameworkInfoCommand() {
         $app_dir = null;
         if(defined('APP')) $app_dir = APP;
 
-        $info = array('cake_path' => CORE_PATH,
-            'cake_version' => $this->_cake_version,
+        $info = array(
+            "framework_handler" => get_class($this),
+            'framework_name' => $this->_framework_name,
+            'framework_version' => $this->_app_framework_version,
+            'framework_path' => CORE_PATH,
             'app_dir' => $app_dir,
             'app_root_dir' => ROOT
         );
         return $info;
     }
 
-    /**
-     * To be overwritten by the child class
-     */
-    protected function _GetRoutesAsStringsCommand() {
-        return array();
-    }
-
-    /**
-     * To be overwritten by the child class
-     */
-    protected function _GetControllersActionsArgumentsCommand() {
-        return array();
-    }
-
-    /**
-     * Get dict of PHP files with paths to be scanned
-     */
-    protected function _GetPathsCommand() {
-        $php_files = $this->_searchFilesInDir(WWW_ROOT, '.php');
-        $paths = array();
-        foreach($php_files as $file) {
-            $paths[$file] = $this->_getPathsFromPHPFile($file);
-        }
-        return $paths;
-    }
-
-    private function _searchFilesInDir($directory, $extension) {
-        $dir = new RecursiveDirectoryIterator($directory);
-        $ite = new RecursiveIteratorIterator($dir);
-        $regPattern = "@$directory.*".str_replace(".","\.",$extension)."@";
-        $files = new RegexIterator($ite, $regPattern, RegexIterator::GET_MATCH);
-        $fileList = array();
-        foreach($files as $file) {
-            $fileList = array_merge($fileList, $file);
-        }
-        return array_unique($fileList);
-    }
-
-    protected function _getPathsFromPHPFile($file) {
-        $result = array();
+    protected function _getPathsForPHPFile($file) {
         if(basename($file) === "index.php") {
+            $result = array();
             $routes = $this->_GetRoutesAsStringsCommand();
             $controllers = $this->_GetControllersActionsArgumentsCommand();
             // $plugins = $this->_GetAllPluginsCommand();
-            $routes = array($routes[count($routes)-1]); // Dev Temp. To do: Remove
+            $routes = array($routes[count($routes)-1]); // Dev Temp. TODO: Remove when all types of routes are handled
             foreach($routes as $route) {
                 if($route[0] === $route[-1]) $route = substr($route, 1, -1); // Removing regex markers
                 if($route[0] === "^") $route = substr($route, 1); // Removing route beginning
@@ -225,7 +130,7 @@ class CakePHPHandler {
             }
         }
         else {
-            $result[] = "/";
+            $result = parent::_getPathsForPHPFile($file);
         }
         return $result;
     }
@@ -293,13 +198,17 @@ class CakePHPHandler {
         return $possibilites;
     }
 
-    /**
-     * Get value of object's protected or private property
-     */
-    protected function _getObjectProperty($object, $property) {
-        $object_reflection = new ReflectionClass($object);
-        $property_reflection = $object_reflection->getProperty($property);
-        $property_reflection->setAccessible(true);
-        return $property_reflection->getValue($object);
+    private function _searchFileInDir($directory, $file) {
+        $scan = scandir($directory);
+        foreach($scan as $value) {
+            if($value === "." || $value === "..") continue;
+            $path = realpath($directory . DIRECTORY_SEPARATOR . $value);
+            if(is_file($path) && $value === $file) return $path;
+            elseif(is_dir($path)) {
+                $tmp = $this->_searchFileInDir($path, $file);
+                if(is_string($tmp)) return $tmp;
+            }
+        }
+        return false;
     }
 }

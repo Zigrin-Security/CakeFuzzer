@@ -49,8 +49,7 @@ async def main():
     iteration = await extractor.get_iteration(vuln)
 
     await extractor.disconnect()
-
-    print(json.dumps(iteration))
+    print(json.dumps(iteration, indent=4))
 
 
 def parse_arguments():

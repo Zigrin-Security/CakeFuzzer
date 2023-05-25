@@ -32,30 +32,42 @@ from cakefuzzer.sqlite.scanners import SqliteMonitors, SqliteScanners
 from cakefuzzer.sqlite.utils import SqliteQueue
 
 
-def limit_paths_to_prefix(paths: List[str], prefix: str) -> List[str]:
+def limit_paths_to_prefix(
+    paths: Dict[str, List[str]], prefix: str
+) -> Dict[str, List[str]]:
     """
     Limit testing on specific paths.
     """
-
-    new_paths = []
-    for p in paths:
-        if p.lower().startswith(prefix.lower()):
-            new_paths.append(p)
+    new_paths = {}
+    for file in paths:
+        for path in paths[file]:
+            if path.lower().startswith(prefix.lower()):
+                if file in new_paths:
+                    new_paths[file].append(path)
+                else:
+                    new_paths[file] = [
+                        path,
+                    ]
     return new_paths
 
 
-def exclude_paths(paths: List[str], pattern: str) -> List[str]:
+def exclude_paths(paths: Dict[str, List[str]], pattern: str) -> Dict[str, List[str]]:
     """
     Exclude paths that match regular expression pattern.
     If the pattern is empty, no paths are excluded.
     """
     if pattern == "":
         return paths
-
-    limited_paths = []
-    for path in paths:
-        if re.search(pattern, path, re.IGNORECASE) is None:
-            limited_paths.append(path)
+    limited_paths = {}
+    for file in paths:
+        for path in paths[file]:
+            if re.search(pattern, path, re.IGNORECASE) is None:
+                if file in limited_paths:
+                    limited_paths[file].append(path)
+                else:
+                    limited_paths[file] = [
+                        path,
+                    ]
 
     return limited_paths
 
@@ -75,7 +87,11 @@ async def compute_paths(
     webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
 ) -> Dict[str, List[str]]:
     app_info = AppInfo(webroot)
-    return await app_info.paths
+    paths = await app_info.paths
+
+    paths = limit_paths_to_prefix(paths, prefix=only_paths_with_prefix)
+    paths = exclude_paths(paths, exclude_pattern)
+    return paths
 
 
 async def compute_paths_old(
@@ -294,14 +310,15 @@ async def start_others() -> None:
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
-        cake_path = await app_info.cakephp_path
+        framework_handler = await app_info.framework_handler
 
         for definition in defs:
             attacks = []
             for php_file in paths:
                 attacks += [
                     AttackScenario(
-                        cake_path=cake_path,
+                        framework_handler=framework_handler,
+                        web_root=str(settings.webroot_dir),
                         webroot_file=str(php_file),
                         strategy_name=definition.strategy_name,
                         payload=payload,
@@ -373,14 +390,13 @@ async def my_start_others() -> None:
 
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
-        cake_path = await app_info.cakephp_path
-
-        # paths = ["Cerebrates/index"]
+        framework_handler = await app_info.framework_handler
 
         for definition in defs:
             attacks = [
                 AttackScenario(
-                    cake_path=cake_path,
+                    framework_handler=framework_handler,
+                    web_root=str(settings.webroot_dir),
                     webroot_file=str(settings.index_php),
                     strategy_name=definition.strategy_name,
                     payload=payload,

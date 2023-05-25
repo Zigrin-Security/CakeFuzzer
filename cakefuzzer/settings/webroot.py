@@ -29,7 +29,7 @@ class WebrootSettings(BaseSettings):
 
         raise ValueError(
             f"File {index_php} does not exist or is not a file. "
-            "Provide a correct path to your CakePHP webroot directory"
+            "Provide a correct path to your application's webroot directory"
         )
 
     @property

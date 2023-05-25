@@ -94,35 +94,51 @@ class AppInfo:
         return await self._call_app_info(["get_plugins", "raw"])  # type: ignore
 
     @property
-    async def cakephp_path(self) -> Path:
+    async def framework_handler(self) -> str:
         """
-        Call '$ app_info.php get_cakephp_path json'.
+        Call '$ app_info.php get_framework_info json'.
         """
-        output = await self._call_app_info(["get_cakephp_info", "json"])
-        return Path(output["cake_path"])
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return output["framework_handler"]
+
+    @property
+    async def framework_path(self) -> Path:
+        """
+        Call '$ app_info.php get_framework_info json'.
+        """
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return Path(output["framework_path"])
 
     @property
     async def log_paths(self) -> Path:
         """
-        Call '$ app_info.php get_cakephp_path json'.
+        Call '$ app_info.php get_log_paths json'.
         """
         output = await self._call_app_info(["get_log_paths", "json"])
         return [Path(p) for p in output]
 
     @property
-    async def cakephp_version(self) -> str:
+    async def framework_name(self) -> str:
         """
-        Call '$ app_info.php get_cakephp_path json'.
+        Call '$ app_info.php get_framework_info json'.
         """
-        output = await self._call_app_info(["get_cakephp_info", "json"])
-        return output["cake_version"]
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return output["framework_name"]
+
+    @property
+    async def framework_version(self) -> str:
+        """
+        Call '$ app_info.php get_framework_info json'.
+        """
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return output["framework_version"]
 
     @property
     async def app_dir(self) -> Path:
         """
-        Call '$ app_info.php get_cakephp_path json'.
+        Call '$ app_info.php get_framework_info json'.
         """
-        output = await self._call_app_info(["get_cakephp_info", "json"])
+        output = await self._call_app_info(["get_framework_info", "json"])
         return Path(output["app_dir"])
 
     @property

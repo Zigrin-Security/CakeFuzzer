@@ -20,7 +20,7 @@ class Instrumentator:
         app_info = AppInfo(self.webroot_dir)
         webroot_settings = load_webroot_settings()
 
-        os.environ["CAKEPHP_PATH"] = str(await app_info.cakephp_path)
+        os.environ["FRAMEWORK_PATH"] = str(await app_info.framework_path)
         os.environ["APP_DIR"] = str(await app_info.app_dir)
         os.environ["WEBROOT_DIR"] = str(self.webroot_dir)
         os.environ["INSTRUMENTATION_INI"] = str(webroot_settings.instrumentation_ini)
@@ -35,33 +35,36 @@ class Instrumentator:
     async def _load_settings_overrides(self) -> List[Instrumentation]:
         return await self.settings.file_overrides
 
-    async def _load_cake_version_patches(self, major_version: int) -> None:
-        version_dir = self.settings.patch_dir / "cakephp" / str(major_version)
+    async def _load_framework_version_patches(self, major_version: int) -> None:
+        app_info = AppInfo(self.webroot_dir)
+
+        version_dir = (
+            self.settings.patch_dir / await app_info.framework_name / str(major_version)
+        )
 
         app_dir = version_dir / "APP_DIR"
-        cakephp_path = version_dir / "CAKEPHP_PATH"
+        patches_framework_path = version_dir / "FRAMEWORK_PATH"
         webroot_dir = version_dir / "WEBROOT"
 
         patches = []
 
-        app_info = AppInfo(self.webroot_dir)
-        cake_app_dir = await app_info.app_dir
-        cake_cakephp_path = await app_info.cakephp_path
+        framework_app_dir = await app_info.app_dir
+        framework_path = await app_info.framework_path
 
         for file in app_dir.rglob("*.patch"):
             original = file.relative_to(app_dir)
             original = original.parent / original.stem
 
-            patch = PatchInstrumentation(patch=file, original=cake_app_dir / original)
+            patch = PatchInstrumentation(
+                patch=file, original=framework_app_dir / original
+            )
             patches.append(patch)
 
-        for file in cakephp_path.rglob("*.patch"):
-            original = file.relative_to(cakephp_path)
+        for file in patches_framework_path.rglob("*.patch"):
+            original = file.relative_to(patches_framework_path)
             original = original.parent / original.stem
 
-            patch = PatchInstrumentation(
-                patch=file, original=cake_cakephp_path / original
-            )
+            patch = PatchInstrumentation(patch=file, original=framework_path / original)
             patches.append(patch)
 
         for file in webroot_dir.rglob("*.patch"):
@@ -77,29 +80,31 @@ class Instrumentator:
 
         return patches
 
-    async def _load_cake_version_copies(self, major_version: int) -> None:
-        version_dir = self.settings.patch_dir / "cakephp" / str(major_version)
+    async def _load_framework_version_copies(self, major_version: int) -> None:
+        app_info = AppInfo(self.webroot_dir)
+        version_dir = (
+            self.settings.patch_dir / await app_info.framework_name / str(major_version)
+        )
 
         app_dir = version_dir / "APP_DIR"
-        cakephp_path = version_dir / "CAKEPHP_PATH"
+        patches_framework_path = version_dir / "FRAMEWORK_PATH"
         webroot_dir = version_dir / "WEBROOT"
 
         copies = []
 
-        app_info = AppInfo(self.webroot_dir)
-        cake_app_dir = await app_info.app_dir
-        cake_cakephp_path = await app_info.cakephp_path
+        framework_app_dir = await app_info.app_dir
+        framework_path = await app_info.framework_path
 
         for file in app_dir.rglob("*.php"):
             original = file.relative_to(app_dir)
 
-            copy = CopyInstrumentation(src=file, dst=cake_app_dir / original)
+            copy = CopyInstrumentation(src=file, dst=framework_app_dir / original)
             copies.append(copy)
 
-        for file in cakephp_path.rglob("*.php"):
-            original = file.relative_to(cakephp_path)
+        for file in patches_framework_path.rglob("*.php"):
+            original = file.relative_to(patches_framework_path)
 
-            copy = CopyInstrumentation(src=file, dst=cake_cakephp_path / original)
+            copy = CopyInstrumentation(src=file, dst=framework_path / original)
             copies.append(copy)
 
         for file in webroot_dir.rglob("*.php"):
@@ -118,17 +123,17 @@ class Instrumentator:
         settings_copies = self.settings.copies
 
         app_info = AppInfo(self.webroot_dir)
-        version = await app_info.cakephp_version
+        version = await app_info.framework_version
 
         major_version = int(version.split(".")[0])
 
-        cake_patches = await self._load_cake_version_patches(major_version)
-        cake_copies = await self._load_cake_version_copies(major_version)
+        framework_patches = await self._load_framework_version_patches(major_version)
+        framework_copies = await self._load_framework_version_copies(major_version)
 
         return (
             settings_overrides,
-            settings_patches + cake_patches,
-            settings_copies + cake_copies,
+            settings_patches + framework_patches,
+            settings_copies + framework_copies,
         )
 
     async def apply(self) -> None:
