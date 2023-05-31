@@ -108,7 +108,7 @@ def sort_stats(stats):
 
 def print_stats(stats, print_format="json"):
     if print_format == "json":
-        print(json.dumps(stats))
+        print(json.dumps(stats, indent=4))
         return
 
     # Assume raw format

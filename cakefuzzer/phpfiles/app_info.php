@@ -21,4 +21,16 @@ include 'instrumented_functions.php';
 set_error_handler('test_error_handling');
 set_exception_handler('exception_handler');
 
-$appInfo->includeApp();
+// The include has to be in the global scope to make taret app global vars really global
+// If the app is included in class, they won't have the global scope.
+
+// Below are three just in case there are some ob_get_clean inside the application
+ob_start();
+ob_start();
+ob_start();
+include $appInfo->getIndex();
+$output = ob_get_clean();
+while(ob_get_level()) $output .= ob_get_clean();
+$app_vars = get_defined_vars();
+unset($app_vars['output'], $app_vars['appInfo']);
+$appInfo->setAppVars($app_vars);

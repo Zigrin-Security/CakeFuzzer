@@ -192,6 +192,8 @@ async def one_param_per_payload(
                     continue
 
                 new_attack = AttackScenario(
+                    framework_handler=scenario.framework_handler,
+                    web_root=scenario.web_root,
                     webroot_file=scenario.webroot_file,
                     strategy_name=scenario.strategy_name,
                     payload=scenario.payload,
@@ -389,6 +391,7 @@ class VulnerabilitiesRegistry:
                     "strategy_name": None,
                     "payload": payload,
                     "detection_result": vuln.vulnerability.detection_result,
+                    "context_location": vuln.vulnerability.context_location,
                     "vulnerability_location": vuln.vulnerability_location,
                     "vulnerability_id": i,
                     "path": None,
@@ -408,6 +411,7 @@ class VulnerabilitiesRegistry:
                     "strategy_name": vuln.iteration_result.scenario.strategy_name,
                     "payload": payload,
                     "detection_result": vuln.vulnerability.detection_result,
+                    "context_location": vuln.vulnerability.context_location,
                     "vulnerability_location": vuln.vulnerability_location,
                     "vulnerability_id": i,
                     "path": vuln.iteration_result.output.path,

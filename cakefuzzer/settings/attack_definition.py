@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -8,6 +8,7 @@ class ScannerDefinition(BaseModel):
     scanner_type: str
     phrase: str
     is_regex: bool = True
+    extra: Optional[Dict[str, str]] = None
 
 
 class AttackStrategyDefinition(BaseModel):

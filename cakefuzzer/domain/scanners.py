@@ -201,10 +201,10 @@ class FileContentsMonitor(Monitor):
             exists, filename, contents = await task
 
             if not exists:
-                print(
-                    f"[Warning] File {filename} currently does not exist. "
-                    "Skipping scan()..."
-                )
+                # print(
+                #     f"[Warning] File {filename} currently does not exist. "
+                #     "Skipping scan()..."
+                # )
                 continue
 
             if not contents:

@@ -58,3 +58,33 @@ class ResultErrorsScanner(IterationResultScanner):
         )
         for vulnerability in vulnerabilities:
             await registry.add(vulnerability)
+
+
+class ContextResultOutputScanner(IterationResultScanner):
+    phrase: str
+    context_location: str
+    payload_guid_phrase: str
+    is_regex: bool = False
+
+    async def scan(
+        self,
+        attack_queue: QueuePut[AttackScenario],
+        registry: VulnerabilitiesAdd,
+        result: IterationResult,
+    ) -> None:
+        
+        vulnerability_builder = VulnerabilityBuilder(
+            phrase=self.phrase,
+            string=result.output.output,
+            payload_guid_phrase=self.payload_guid_phrase,
+            is_regex=self.is_regex,
+        )
+        vulnerabilities = vulnerability_builder.get_vulnerability_objects(
+            context_location=self.context_location,
+            timestamp=time.time(),
+            scanner_id=hash(self),
+            iteration_result_id=hash(result),  # We cannot get it now, have to wait...
+        )
+
+        for vulnerability in vulnerabilities:
+            await registry.add(vulnerability)

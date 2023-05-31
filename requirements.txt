@@ -7,3 +7,4 @@ aiosqlite==0.17.0
 persist-queue==0.8.0
 progress==1.6
 scapy==2.5.0
+beautifulsoup4==4.12.2

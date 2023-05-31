@@ -2,8 +2,10 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from typing import Iterator, List, Match
+from typing import Iterator, List, Match, Optional
 from uuid import uuid4
+from bs4 import BeautifulSoup
+import fnmatch
 
 from cakefuzzer.domain.vulnerability import Vulnerability
 
@@ -51,19 +53,31 @@ class VulnerabilityBuilder:
             return [match]
         return []
 
-    def get_vulnerability_objects(self, **kwargs) -> List[Vulnerability]:
+    def get_vulnerability_objects(
+        self, context_location: Optional[str] = None, **kwargs
+    ) -> List[Vulnerability]:
         start_time = time.time()
 
         vulnerabilities = []
         for match in self._find():
+            detection_result = match.group(0).strip('"')
             payload_guid = (
                 match.group("CAKEFUZZER_PAYLOAD_GUID")
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
+            if context_location is not None:
+                locations = find_html_location(self.string, detection_result)
+                detection_location = fnmatch.filter(locations, context_location)
+                
+                # If the context location is not where it should be, skip it
+                if detection_location == []:
+                    continue
+
             vulnerabilities.append(
                 Vulnerability(
-                    detection_result=match.group(0).strip('"'),
+                    detection_result=detection_result,
+                    context_location=detection_location.__repr__().strip("[]"),
                     payload_guid=payload_guid,
                     **kwargs,
                 )
@@ -80,3 +94,23 @@ class VulnerabilityBuilder:
                 f.write(self.string)
 
         return vulnerabilities
+
+
+def find_html_location(
+    contents: str,
+    phrase: str,
+) -> None:
+    soup = BeautifulSoup(contents, "html.parser")
+    tags = []
+    for tag in soup.find_all():
+        if phrase in tag.text:
+            tags.append(f"{tag.name}.text")
+        if phrase.lower() in tag.name:
+            # !!! HTML sees "<_" as "&lt;" so it doesnt recognize it as a tag
+            tags.append("tag")
+        for attr, value in tag.attrs.items():
+            if phrase in value:
+                tags.append(f"{tag.name}.{attr}.value")
+            if phrase.lower() in attr:
+                tags.append(f"{tag.name}.attr")
+    return tags

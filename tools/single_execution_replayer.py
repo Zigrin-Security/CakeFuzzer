@@ -24,11 +24,13 @@ class IterationHandler:
 
     def get_config(self, iteration):
         config = {
-            "fuzz_skip_keys": {"_SERVER": [
-                "HTTP_CONTENT_ENCODING",
-                "HTTP_X_HTTP_METHOD_OVERRIDE",
-                "HTTP_AUTHORIZATION"
-            ]},
+            "fuzz_skip_keys": {
+                "_SERVER": [
+                    "HTTP_CONTENT_ENCODING",
+                    "HTTP_X_HTTP_METHOD_OVERRIDE",
+                    "HTTP_AUTHORIZATION",
+                ]
+            },
             "global_exclude": [],
             "global_targets": [],
             "known_keywords": [],
@@ -37,7 +39,8 @@ class IterationHandler:
 
         from_scenario = {
             "PAYLOAD_GUID_phrase": None,
-            "cake_path": None,
+            "framework_handler": None,
+            "web_root": None,
             "webroot_file": None,
             "injectable": None,
             "strategy_name": None,
@@ -82,7 +85,9 @@ async def main():
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Generate config from the iteration result ")
+    parser = argparse.ArgumentParser(
+        description="Generate config from the iteration result "
+    )
     parser.add_argument(
         "-d",
         "--database",
@@ -101,14 +106,14 @@ def parse_arguments():
         "--command",
         help="Generate the PHP command with to replay the attack",
         default=False,
-        action='store_true'
+        action="store_true",
     )
     parser.add_argument(
         "-x",
         "--xdebug",
         help="Set the XDEBUG_SESSION flag for debugging. Has effect only with --command",
         default=False,
-        action='store_true'
+        action="store_true",
     )
     args = parser.parse_args()
     return args
