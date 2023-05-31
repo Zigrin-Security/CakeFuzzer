@@ -27,7 +27,6 @@ if (!is_dir($directory)) {
     exit(1);
 }
 
-
 // Construct the iterator
 $it = new RecursiveDirectoryIterator($directory);
 
@@ -46,43 +45,49 @@ foreach(new RecursiveIteratorIterator($it) as $file) {
 
     $content = file_get_contents($preAnnotationFile);
 
-    // Initialize the parser
-    $parserFactory = new ParserFactory();
-    $parser = $parserFactory->create(ParserFactory::PREFER_PHP7);
+    try {
+        // Initialize the parser
+        $parserFactory = new ParserFactory();
+        $parser = $parserFactory->create(ParserFactory::PREFER_PHP7);
 
-    // Parse the input PHP code
-    $ast = $parser->parse($content);
+        // Parse the input PHP code
+        $ast = $parser->parse($content);
 
-    // Create a traverser and add custom node visitors to remove type hints and annotations
-    $traverser = new NodeTraverser();
-    $traverser->addVisitor(new class extends NodeVisitorAbstract {
-        public function leaveNode(\PhpParser\Node $node) {
-            if ($node instanceof \PhpParser\Node\Stmt\Function_ || $node instanceof \PhpParser\Node\Stmt\ClassMethod) {
-                // Remove return type hints
-                $node->returnType = null;
+        // Create a traverser and add custom node visitors to remove type hints and annotations
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor(new class extends NodeVisitorAbstract {
+            public function leaveNode(\PhpParser\Node $node) {
+                if ($node instanceof \PhpParser\Node\Stmt\Function_ || $node instanceof \PhpParser\Node\Stmt\ClassMethod) {
+                    // Remove return type hints
+                    $node->returnType = null;
 
-                // Remove argument type hints
-                foreach ($node->params as $param) {
-                    $param->type = null;
+                    // Remove argument type hints
+                    foreach ($node->params as $param) {
+                        $param->type = null;
+                    }
                 }
+
+                // if ($node instanceof \PhpParser\Node\Stmt\Class_) {
+                //     // Remove PHPDoc comments (annotations)
+                //     $node->setDocComment(null);
+                // }
             }
+        });
 
-            // if ($node instanceof \PhpParser\Node\Stmt\Class_) {
-            //     // Remove PHPDoc comments (annotations)
-            //     $node->setDocComment(null);
-            // }
-        }
-    });
+        // Traverse and modify the AST
+        $modifiedAst = $traverser->traverse($ast);
 
-    // Traverse and modify the AST
-    $modifiedAst = $traverser->traverse($ast);
+        // Pretty-print the modified AST to PHP code
+        $prettyPrinter = new PrettyPrinter\Standard();
+        $modifiedCode = $prettyPrinter->prettyPrintFile($modifiedAst);
 
-    // Pretty-print the modified AST to PHP code
-    $prettyPrinter = new PrettyPrinter\Standard();
-    $modifiedCode = $prettyPrinter->prettyPrintFile($modifiedAst);
+        // Save the modified PHP code to the original file
+        file_put_contents($inputFile, $modifiedCode);
 
-    // Save the modified PHP code to the original file
-    file_put_contents($inputFile, $modifiedCode);
-
-    echo "Type hints and annotations removed from '{$inputFile}', original file renamed to '{$preAnnotationFile}'\n";
+        echo "Type hints and annotations removed from '{$inputFile}', original file renamed to '{$preAnnotationFile}'\n";
+    } catch (Exception $e) {
+        echo "Error parsing file '{$inputFile}': " . $e->getMessage() . "\n";
+        // Reverse the file rename
+        rename($preAnnotationFile, $inputFile);
+    }
 }
