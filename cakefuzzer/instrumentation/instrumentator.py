@@ -32,8 +32,8 @@ class Instrumentator:
     async def _load_settings_patches(self) -> List[Instrumentation]:
         return self.settings.patches
 
-    async def _load_settings_overrides(self) -> List[Instrumentation]:
-        return await self.settings.file_overrides
+    async def _load_settings_fcall_renames(self) -> List[Instrumentation]:
+        return self.settings.fcall_renames
 
     async def _load_annotations_removal(self) -> List[Instrumentation]:
         return self.settings.remove_annotations
@@ -122,7 +122,7 @@ class Instrumentator:
         await self._load_settings()
 
         settings_patches = await self._load_settings_patches()
-        settings_overrides = await self._load_settings_overrides()
+        fcall_renames = await self._load_settings_fcall_renames()
         annotations_removal = await self._load_annotations_removal()
         settings_copies = self.settings.copies
 
@@ -135,7 +135,7 @@ class Instrumentator:
         framework_copies = await self._load_framework_version_copies(major_version)
 
         return (
-            settings_overrides,
+            fcall_renames,
             settings_patches + framework_patches,
             settings_copies + framework_copies,
             annotations_removal,
@@ -143,15 +143,15 @@ class Instrumentator:
 
     async def apply(self) -> None:
         (
-            overrides,
+            frenames,
             patches,
             copies,
             annotation_removal,
         ) = await self._load_instrumentations()
 
-        _, unapplied = await check(*overrides)
+        _, unapplied = await check(*frenames)
         unapplied = await apply(*unapplied)
-        print("Overrides Applied", len(unapplied))
+        print("FunctionCall Renames Applied", len(unapplied))
 
         _, unapplied = await check(*patches)
         unapplied = await apply(*unapplied)
@@ -167,7 +167,7 @@ class Instrumentator:
 
     async def revert(self) -> None:
         (
-            overrides,
+            frenames,
             patches,
             copies,
             annotation_removal,
@@ -177,9 +177,9 @@ class Instrumentator:
         await revert(*applied)
         print("Annotations Reverted", len(applied))
 
-        applied, _ = await check(*overrides)
+        applied, _ = await check(*frenames)
         await revert(*applied)
-        print("Overrides Reverted", len(applied))
+        print("FunctionCall Renames Reverted", len(applied))
 
         applied, _ = await check(*patches)
         await revert(*applied)
@@ -191,15 +191,15 @@ class Instrumentator:
 
     async def is_applied(self) -> None:
         (
-            overrides,
+            frenames,
             patches,
             copies,
             annotation_removal,
         ) = await self._load_instrumentations()
 
-        applied, unapplied = await check(*overrides)
+        applied, unapplied = await check(*frenames)
         print("Applied / Unapplied")
-        print(f"Overrides: {len(applied)}/{len(unapplied)}")
+        print(f"FunctionCall Renames: {len(applied)}/{len(unapplied)}")
 
         applied, unapplied = await check(*patches)
         print(f"Patches: {len(applied)}/{len(unapplied)}")

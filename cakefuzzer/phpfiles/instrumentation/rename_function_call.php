@@ -20,7 +20,21 @@ if (!isset($argv[1])) {
     exit(1);
 }
 
+// The second argument (index 2) is the function name to rename from
+if (!isset($argv[2])) {
+    echo "Error: Function name to rename from not provided\n";
+    exit(1);
+}
+
+// The third argument (index 3) is the new function name
+if (!isset($argv[3])) {
+    echo "Error: New function name not provided\n";
+    exit(1);
+}
+
 $directory = $argv[1];
+$renameFrom = $argv[2];
+$renameTo = $argv[3];
 
 if (!is_dir($directory)) {
     echo "Error: Directory not found\n";
@@ -38,7 +52,7 @@ foreach (new RecursiveIteratorIterator($it) as $file) {
     }
 
     $inputFile = $file->getPathname();
-    $preAnnotationFile = $inputFile . '.preannotation';
+    $preRenameFile = $inputFile . '.prerename';
 
     $content = file_get_contents($inputFile);
 
@@ -52,25 +66,34 @@ foreach (new RecursiveIteratorIterator($it) as $file) {
 
         $changed = false;
 
-        // Create a traverser and add custom node visitors to remove type hints and annotations
+        // Create a traverser and add custom node visitors to rename function calls
         $traverser = new NodeTraverser();
-        $traverser->addVisitor(new class extends NodeVisitorAbstract {
-            public function leaveNode(\PhpParser\Node $node) {
-                if ($node instanceof \PhpParser\Node\Stmt\Function_ || $node instanceof \PhpParser\Node\Stmt\ClassMethod) {
-                    // Remove return type hints
-                    if ($node->returnType !== null) {
-                        $node->returnType = null;
+        $traverser->addVisitor(new class ($renameFrom, $renameTo) extends NodeVisitorAbstract {
+            private $renameFrom;
+            private $renameTo;
+            private $changed = false;
+
+            public function __construct($renameFrom, $renameTo)
+            {
+                $this->renameFrom = $renameFrom;
+                $this->renameTo = $renameTo;
+            }
+
+            public function leaveNode(\PhpParser\Node $node)
+            {
+                if ($node instanceof \PhpParser\Node\Expr\FuncCall && $node->name instanceof \PhpParser\Node\Name) {
+                    // Rename the function call if it matches the provided name
+                    if ($node->name->toString() === $this->renameFrom) {
+                        $node->name = new \PhpParser\Node\Name($this->renameTo);
+                        $this->changed = true;
                         $GLOBALS['changed'] = true;
                     }
-
-                    // Remove argument type hints
-                    foreach ($node->params as $param) {
-                        if ($param->type !== null) {
-                            $param->type = null;
-                            $GLOBALS['changed'] = true;
-                        }
-                    }
                 }
+            }
+
+            public function hasChanged()
+            {
+                return $this->changed;
             }
         });
 
@@ -83,12 +106,12 @@ foreach (new RecursiveIteratorIterator($it) as $file) {
 
         if ($changed) {
             // Rename the original file
-            rename($inputFile, $preAnnotationFile);
+            rename($inputFile, $preRenameFile);
 
             // Save the modified PHP code to the original file
             file_put_contents($inputFile, $modifiedCode);
 
-            echo "Type hints and annotations removed from '{$inputFile}', original file renamed to '{$preAnnotationFile}'\n";
+            echo "Function calls to '{$renameFrom}' renamed to '{$renameTo}' in '{$inputFile}', original file renamed to '{$preRenameFile}'\n";
         }
     } catch (Exception $e) {
         echo "Error parsing file '{$inputFile}': " . $e->getMessage() . "\n";

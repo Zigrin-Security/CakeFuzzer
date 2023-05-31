@@ -13,6 +13,7 @@ async def install_php_parser() -> None:
     command = ["bash", "cakefuzzer/phpfiles/instrumentation/install_php_parser.sh"]
 
     proc = await asyncio.create_subprocess_exec(*command)
+    await proc.wait()
     if proc.returncode != 0:
         raise InstrumentationError(
             error="Error while installing php-parser, got non-zero response from subprocess",
@@ -38,6 +39,7 @@ class RemoveAnnotationsInstrumentation(BaseModel):
         ]
 
         proc = await asyncio.create_subprocess_exec(*command)
+        await proc.wait()
         if proc.returncode != 0:
             raise InstrumentationError(
                 error="Error while instrumenting, got non-zero response from subprocess",

@@ -13,7 +13,7 @@ async def _run_subprocess(*args: str) -> None:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    await proc.communicate()
+    await proc.wait()
 
     if proc.returncode != 0:
         raise InstrumentationError(
