@@ -56,7 +56,9 @@ foreach (new RecursiveIteratorIterator($it) as $file) {
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new class extends NodeVisitorAbstract {
             public function leaveNode(\PhpParser\Node $node) {
-                if ($node instanceof \PhpParser\Node\Stmt\Function_ || $node instanceof \PhpParser\Node\Stmt\ClassMethod) {
+                if ($node instanceof \PhpParser\Node\Stmt\Function_
+                    || $node instanceof \PhpParser\Node\Stmt\ClassMethod
+                    || $node instanceof \PhpParser\Node\Expr\Closure) { // Check for anonymous functions
                     // Remove return type hints
                     if ($node->returnType !== null) {
                         $node->returnType = null;

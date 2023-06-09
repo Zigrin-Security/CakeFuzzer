@@ -149,10 +149,6 @@ class Instrumentator:
             annotation_removal,
         ) = await self._load_instrumentations()
 
-        _, unapplied = await check(*frenames)
-        unapplied = await apply(*unapplied)
-        print("FunctionCall Renames Applied", len(unapplied))
-
         _, unapplied = await check(*patches)
         unapplied = await apply(*unapplied)
         print("Patches Applied", len(unapplied))
@@ -160,6 +156,10 @@ class Instrumentator:
         _, unapplied = await check(*copies)
         unapplied = await apply(*unapplied)
         print("Copies Applied", len(unapplied))
+
+        _, unapplied = await check(*frenames)
+        unapplied = await apply(*unapplied)
+        print("FunctionCall Renames Applied", len(unapplied))
 
         _, unapplied = await check(*annotation_removal)
         unapplied = await apply(*unapplied)
@@ -173,12 +173,12 @@ class Instrumentator:
             annotation_removal,
         ) = await self._load_instrumentations()
 
-        applied, _ = await check(*annotation_removal)
-        await revert(*applied)
+        applied, unapplied = await check(*annotation_removal)
+        await revert(*applied, *unapplied)
         print("Annotations Reverted", len(applied))
 
-        applied, _ = await check(*frenames)
-        await revert(*applied)
+        applied, unapplied = await check(*frenames)
+        await revert(*applied, *unapplied)
         print("FunctionCall Renames Reverted", len(applied))
 
         applied, _ = await check(*patches)
@@ -199,7 +199,7 @@ class Instrumentator:
 
         applied, unapplied = await check(*frenames)
         print("Applied / Unapplied")
-        print(f"FunctionCall Renames: {len(applied)}/{len(unapplied)}")
+        print(f"FunctionCall Renames: x/{len(applied) + len(unapplied)}")
 
         applied, unapplied = await check(*patches)
         print(f"Patches: {len(applied)}/{len(unapplied)}")
@@ -208,4 +208,4 @@ class Instrumentator:
         print(f"Copies: {len(applied)}/{len(unapplied)}")
 
         applied, unapplied = await check(*annotation_removal)
-        print(f"Annotations: {len(applied)}/{len(unapplied)}")
+        print(f"Annotations: x/{len(applied) + len(unapplied)}")
