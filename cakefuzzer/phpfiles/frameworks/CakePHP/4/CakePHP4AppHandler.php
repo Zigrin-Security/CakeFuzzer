@@ -56,7 +56,7 @@ class CakePHP4AppHandler extends CakePHPHandler {
         foreach($dirs as $dir) {
             $paths = $this->_GetDirContents($dir);
             foreach($paths as $path) {
-                if(strpos($path, $c_const.$ext) !== false) {
+                if(strpos($path, $c_const.$ext) !== false && substr(basename($path),-strlen($c_const.$ext)) === $c_const.$ext) {
                     $controllers[] = substr($path, strlen($dir), -strlen($c_const)-strlen($ext));
                 }
             }
