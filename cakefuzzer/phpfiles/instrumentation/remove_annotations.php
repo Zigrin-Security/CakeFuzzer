@@ -84,9 +84,10 @@ foreach (new RecursiveIteratorIterator($it) as $file) {
         $modifiedCode = $prettyPrinter->prettyPrintFile($modifiedAst);
 
         if ($changed) {
-            // Rename the original file
-            rename($inputFile, $preAnnotationFile);
-
+            if (!file_exists($preAnnotationFile)) {
+                // Rename the original file
+                rename($inputFile, $preAnnotationFile);
+            }
             // Save the modified PHP code to the original file
             file_put_contents($inputFile, $modifiedCode);
 
