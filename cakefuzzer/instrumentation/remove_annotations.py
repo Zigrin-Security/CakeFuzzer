@@ -6,10 +6,16 @@ from pydantic import BaseModel
 from cakefuzzer.instrumentation import InstrumentationError
 
 
-php_parser_semaphore = asyncio.Semaphore(1)
+php_parser_semaphore: asyncio.Semaphore | None = None
 
 
 async def install_php_parser() -> None:
+
+    # Work around for creating semaphore in async function
+    #  instead of in global scope (non-async context)
+    global php_parser_semaphore
+    if php_parser_semaphore is None:
+        php_parser_semaphore = asyncio.Semaphore(1)
 
     # We only want to install php-parser once so we use a semaphore to make sure
     # that only one process can install it at a time
