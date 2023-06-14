@@ -28,15 +28,13 @@ class InstrumentationError(CakeFuzzerError):
 
 
 async def apply(*args: Instrumentation) -> List[Instrumentation]:
-    _, unapplied = await check(*args)
-    await asyncio.gather(*[p.apply() for p in unapplied])
-    return unapplied
+    await asyncio.gather(*[p.apply() for p in args])
+    return args
 
 
 async def revert(*args: Instrumentation) -> List[Instrumentation]:
-    applied, _ = await check(*args)
-    await asyncio.gather(*[p.revert() for p in applied])
-    return applied
+    await asyncio.gather(*[p.revert() for p in args])
+    return args
 
 
 async def check(

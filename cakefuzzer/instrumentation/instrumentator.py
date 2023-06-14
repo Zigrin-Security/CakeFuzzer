@@ -175,11 +175,11 @@ class Instrumentator:
 
         applied, unapplied = await check(*annotation_removal)
         await revert(*applied, *unapplied)
-        print("Annotations Reverted", len(applied))
+        print("Annotations Reverted", len(applied) + len(unapplied))
 
         applied, unapplied = await check(*frenames)
         await revert(*applied, *unapplied)
-        print("FunctionCall Renames Reverted", len(applied))
+        print("FunctionCall Renames Reverted", len(applied) + len(unapplied))
 
         applied, _ = await check(*patches)
         await revert(*applied)
