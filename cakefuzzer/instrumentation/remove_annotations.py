@@ -6,19 +6,26 @@ from pydantic import BaseModel
 from cakefuzzer.instrumentation import InstrumentationError
 
 
+php_parser_semaphore = asyncio.Semaphore(1)
+
+
 async def install_php_parser() -> None:
-    if Path("php-parser").exists():
-        return
 
-    command = ["bash", "cakefuzzer/phpfiles/instrumentation/install_php_parser.sh"]
+    # We only want to install php-parser once so we use a semaphore to make sure
+    # that only one process can install it at a time
+    async with php_parser_semaphore:
+        if Path("php-parser").exists():
+            return
 
-    proc = await asyncio.create_subprocess_exec(*command)
-    await proc.wait()
-    if proc.returncode != 0:
-        raise InstrumentationError(
-            error="Error while installing php-parser, got non-zero response from subprocess",
-            hint=" ".join(command),
-        )
+        command = ["bash", "cakefuzzer/phpfiles/instrumentation/install_php_parser.sh"]
+
+        proc = await asyncio.create_subprocess_exec(*command)
+        await proc.wait()
+        if proc.returncode != 0:
+            raise InstrumentationError(
+                error="Error while installing php-parser, got non-zero response from subprocess",
+                hint=" ".join(command),
+            )
 
 class RemoveAnnotationsInstrumentation(BaseModel):
     path: Path
@@ -32,19 +39,20 @@ class RemoveAnnotationsInstrumentation(BaseModel):
 
         await install_php_parser()
 
-        command = [
-            "php",
-            "cakefuzzer/phpfiles/instrumentation/remove_annotations.php",
-            str(self.path),
-        ]
+        async with php_parser_semaphore:
+            command = [
+                "php",
+                "cakefuzzer/phpfiles/instrumentation/remove_annotations.php",
+                str(self.path),
+            ]
 
-        proc = await asyncio.create_subprocess_exec(*command)
-        await proc.wait()
-        if proc.returncode != 0:
-            raise InstrumentationError(
-                error="Error while instrumenting, got non-zero response from subprocess",
-                hint=" ".join(command),
-            )
+            proc = await asyncio.create_subprocess_exec(*command)
+            await proc.wait()
+            if proc.returncode != 0:
+                raise InstrumentationError(
+                    error="Error while instrumenting, got non-zero response from subprocess",
+                    hint=" ".join(command),
+                )
 
     async def revert(self) -> None:
         for backup_file in self.path.rglob("*.preannotation"):
