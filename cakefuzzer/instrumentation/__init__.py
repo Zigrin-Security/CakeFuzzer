@@ -4,13 +4,13 @@ from typing import List, Optional, Protocol, Tuple
 
 
 class Instrumentation(Protocol):
-    async def is_applied(self) -> bool:
+    async def is_applied(self, lock: asyncio.Semaphore) -> bool:
         ...
 
-    async def apply(self) -> None:
+    async def apply(self, lock: asyncio.Semaphore) -> None:
         ...
 
-    async def revert(self) -> None:
+    async def revert(self, lock: asyncio.Semaphore) -> None:
         ...
 
 
@@ -28,19 +28,22 @@ class InstrumentationError(CakeFuzzerError):
 
 
 async def apply(*args: Instrumentation) -> List[Instrumentation]:
-    await asyncio.gather(*[p.apply() for p in args])
+    semaphore = asyncio.Semaphore(1)
+    await asyncio.gather(*[p.apply(semaphore) for p in args])
     return args
 
 
 async def revert(*args: Instrumentation) -> List[Instrumentation]:
-    await asyncio.gather(*[p.revert() for p in args])
+    semaphore = asyncio.Semaphore(1)
+    await asyncio.gather(*[p.revert(semaphore) for p in args])
     return args
 
 
 async def check(
     *args: Instrumentation,
 ) -> Tuple[List[Instrumentation], List[Instrumentation]]:
-    are_applied = await asyncio.gather(*[i.is_applied() for i in args])
+    semaphore = asyncio.Semaphore(1)
+    are_applied = await asyncio.gather(*[i.is_applied(semaphore) for i in args])
     applied = [patch for is_applied, patch in zip(are_applied, args) if is_applied]
     unapplied = [
         patch for is_applied, patch in zip(are_applied, args) if not is_applied

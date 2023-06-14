@@ -6,20 +6,10 @@ from pydantic import BaseModel
 from cakefuzzer.instrumentation import InstrumentationError
 
 
-php_parser_semaphore: asyncio.Semaphore | None = None
-
-
-async def install_php_parser() -> None:
-
-    # Work around for creating semaphore in async function
-    #  instead of in global scope (non-async context)
-    global php_parser_semaphore
-    if php_parser_semaphore is None:
-        php_parser_semaphore = asyncio.Semaphore(1)
-
+async def install_php_parser(lock: asyncio.Semaphore) -> None:
     # We only want to install php-parser once so we use a semaphore to make sure
     # that only one process can install it at a time
-    async with php_parser_semaphore:
+    async with lock:
         if Path("php-parser").exists():
             return
 
@@ -33,19 +23,19 @@ async def install_php_parser() -> None:
                 hint=" ".join(command),
             )
 
+
 class RemoveAnnotationsInstrumentation(BaseModel):
     path: Path
 
-    async def is_applied(self) -> bool:
+    async def is_applied(self, lock: asyncio.Semaphore) -> bool:
         """Not really possible to check if this is applied"""
 
         return False
 
-    async def apply(self) -> None:
+    async def apply(self, lock: asyncio.Semaphore) -> None:
+        await install_php_parser(lock)
 
-        await install_php_parser()
-
-        async with php_parser_semaphore:
+        async with lock:
             command = [
                 "php",
                 "cakefuzzer/phpfiles/instrumentation/remove_annotations.php",
@@ -60,6 +50,6 @@ class RemoveAnnotationsInstrumentation(BaseModel):
                     hint=" ".join(command),
                 )
 
-    async def revert(self) -> None:
+    async def revert(self, lock: asyncio.Semaphore) -> None:
         for backup_file in self.path.rglob("*.preannotation"):
             backup_file.rename(backup_file.with_suffix(""))

@@ -3,10 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from cakefuzzer.instrumentation.remove_annotations import (
-    install_php_parser,
-    php_parser_semaphore,
-)
+from cakefuzzer.instrumentation.remove_annotations import install_php_parser
 from cakefuzzer.instrumentation import InstrumentationError
 
 
@@ -15,15 +12,15 @@ class FunctionCallRenameInstrumentation(BaseModel):
     rename_from: str
     rename_to: str
 
-    async def is_applied(self) -> bool:
+    async def is_applied(self, lock: asyncio.Semaphore) -> bool:
         """Not really possible to check if this is applied"""
 
         return False
 
-    async def apply(self) -> None:
-        await install_php_parser()
+    async def apply(self, lock: asyncio.Semaphore) -> None:
+        await install_php_parser(lock)
 
-        async with php_parser_semaphore:
+        async with lock:
             command = [
                 "php",
                 "cakefuzzer/phpfiles/instrumentation/rename_function_call.php",
@@ -40,6 +37,6 @@ class FunctionCallRenameInstrumentation(BaseModel):
                     hint=" ".join(command),
                 )
 
-    async def revert(self) -> None:
+    async def revert(self, lock: asyncio.Semaphore) -> None:
         for backup_file in self.path.rglob("*.prerename"):
             backup_file.rename(backup_file.with_suffix(""))
