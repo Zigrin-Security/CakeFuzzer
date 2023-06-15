@@ -1,11 +1,12 @@
+import fnmatch
 import os
 import re
 import time
 from dataclasses import dataclass
 from typing import Iterator, List, Match, Optional
 from uuid import uuid4
+
 from bs4 import BeautifulSoup
-import fnmatch
 
 from cakefuzzer.domain.vulnerability import Vulnerability
 
@@ -69,10 +70,10 @@ class VulnerabilityBuilder:
             if context_location is not None:
                 locations = find_html_location(self.string, detection_result)
                 detection_location = fnmatch.filter(locations, context_location)
-                
-                # If the context location is not where it should be, skip it
-                if detection_location == []:
-                    continue
+
+            # If the context location is not where it should be, skip it
+            if detection_location == [] or detection_location is None:
+                continue
 
             vulnerabilities.append(
                 Vulnerability(
