@@ -56,3 +56,7 @@ docs/_build/
 *.db
 *.db-shm
 *.db-wal
+
+# php-parser
+php-parser/
+php-parser.zip

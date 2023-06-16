@@ -13,7 +13,7 @@ async def _run_subprocess(*args: str) -> None:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    await proc.communicate()
+    await proc.wait()
 
     if proc.returncode != 0:
         raise InstrumentationError(
@@ -26,7 +26,7 @@ class PatchInstrumentation(BaseModel):
     patch: Path
     original: Path
 
-    async def is_applied(self) -> bool:
+    async def is_applied(self, lock: asyncio.Semaphore) -> bool:
         try:
             await _run_subprocess(
                 "patch",
@@ -41,8 +41,8 @@ class PatchInstrumentation(BaseModel):
         except InstrumentationError:
             return False
 
-    async def apply(self) -> None:
+    async def apply(self, lock: asyncio.Semaphore) -> None:
         await _run_subprocess("patch", str(self.original), str(self.patch))
 
-    async def revert(self) -> None:
+    async def revert(self, lock: asyncio.Semaphore) -> None:
         await _run_subprocess("patch", "--reverse", str(self.original), str(self.patch))
