@@ -72,7 +72,7 @@ class VulnerabilityBuilder:
                 detection_location = fnmatch.filter(locations, context_location)
 
             # If the context location is not where it should be, skip it
-            if detection_location == [] or detection_location is None:
+            if detection_location is None or detection_location == []:
                 continue
 
             vulnerabilities.append(
