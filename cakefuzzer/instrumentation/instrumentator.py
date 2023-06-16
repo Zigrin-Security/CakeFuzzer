@@ -32,8 +32,11 @@ class Instrumentator:
     async def _load_settings_patches(self) -> List[Instrumentation]:
         return self.settings.patches
 
-    async def _load_settings_overrides(self) -> List[Instrumentation]:
-        return await self.settings.file_overrides
+    async def _load_settings_fcall_renames(self) -> List[Instrumentation]:
+        return self.settings.fcall_renames
+
+    async def _load_annotations_removal(self) -> List[Instrumentation]:
+        return self.settings.remove_annotations
 
     async def _load_framework_version_patches(self, major_version: int) -> None:
         app_info = AppInfo(self.webroot_dir)
@@ -119,7 +122,8 @@ class Instrumentator:
         await self._load_settings()
 
         settings_patches = await self._load_settings_patches()
-        settings_overrides = await self._load_settings_overrides()
+        fcall_renames = await self._load_settings_fcall_renames()
+        annotations_removal = await self._load_annotations_removal()
         settings_copies = self.settings.copies
 
         app_info = AppInfo(self.webroot_dir)
@@ -131,17 +135,19 @@ class Instrumentator:
         framework_copies = await self._load_framework_version_copies(major_version)
 
         return (
-            settings_overrides,
+            fcall_renames,
             settings_patches + framework_patches,
             settings_copies + framework_copies,
+            annotations_removal,
         )
 
     async def apply(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
-
-        _, unapplied = await check(*overrides)
-        unapplied = await apply(*unapplied)
-        print("Overrides Applied", len(unapplied))
+        (
+            frenames,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
 
         _, unapplied = await check(*patches)
         unapplied = await apply(*unapplied)
@@ -151,12 +157,29 @@ class Instrumentator:
         unapplied = await apply(*unapplied)
         print("Copies Applied", len(unapplied))
 
-    async def revert(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
+        _, unapplied = await check(*frenames)
+        unapplied = await apply(*unapplied)
+        print("FunctionCall Renames Applied", len(unapplied))
 
-        applied, _ = await check(*overrides)
-        await revert(*applied)
-        print("Overrides Reverted", len(applied))
+        _, unapplied = await check(*annotation_removal)
+        unapplied = await apply(*unapplied)
+        print("Annotations Removed", len(unapplied))
+
+    async def revert(self) -> None:
+        (
+            frenames,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
+
+        applied, unapplied = await check(*annotation_removal)
+        await revert(*applied, *unapplied)
+        print("Annotations Reverted", len(applied) + len(unapplied))
+
+        applied, unapplied = await check(*frenames)
+        await revert(*applied, *unapplied)
+        print("FunctionCall Renames Reverted", len(applied) + len(unapplied))
 
         applied, _ = await check(*patches)
         await revert(*applied)
@@ -167,14 +190,22 @@ class Instrumentator:
         print("Copies Reverted", len(applied))
 
     async def is_applied(self) -> None:
-        overrides, patches, copies = await self._load_instrumentations()
+        (
+            frenames,
+            patches,
+            copies,
+            annotation_removal,
+        ) = await self._load_instrumentations()
 
-        applied, unapplied = await check(*overrides)
+        applied, unapplied = await check(*frenames)
         print("Applied / Unapplied")
-        print(f"Overrides: {len(applied)}/{len(unapplied)}")
+        print(f"FunctionCall Renames: x/{len(applied) + len(unapplied)}")
 
         applied, unapplied = await check(*patches)
         print(f"Patches: {len(applied)}/{len(unapplied)}")
 
         applied, unapplied = await check(*copies)
         print(f"Copies: {len(applied)}/{len(unapplied)}")
+
+        applied, unapplied = await check(*annotation_removal)
+        print(f"Annotations: x/{len(applied) + len(unapplied)}")

@@ -1,49 +1,11 @@
---- /var/www/cerebrate/vendor/cakephp/cakephp/src/Http/ServerRequestFactory.php.orig	2023-03-16 14:02:04.215274116 +0000
-+++ /var/www/cerebrate/vendor/cakephp/cakephp/src/Http/ServerRequestFactory.php	2023-03-16 15:26:39.578989322 +0000
-@@ -1,6 +1,6 @@
- <?php
- declare(strict_types=1);
--
-+// CakeFuzzerInstrumentation:patched
- /**
-  * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
-  * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
-@@ -112,7 +112,7 @@
-      * @param \Cake\Http\ServerRequest $request Request instance.
-      * @return \Cake\Http\ServerRequest
+--- ServerRequestFactory.php.orig	2023-06-10 11:22:43.919751867 +0000
++++ ServerRequestFactory.php	2023-06-10 11:23:37.851298893 +0000
+@@ -225,7 +225,7 @@
       */
--    protected static function marshalBodyAndRequestMethod(array $parsedBody, ServerRequest $request): ServerRequest
-+    protected static function marshalBodyAndRequestMethod($parsedBody, ServerRequest $request): ServerRequest
-     {
-         $method = $request->getMethod();
-         $override = false;
-@@ -223,9 +223,9 @@
-      *   $_SERVER will be added into the $server parameter.
-      * @return \Psr\Http\Message\UriInterface New instance.
-      */
--    public static function createUri(array $server = []): UriInterface
-+    public static function createUri($server = []): UriInterface
+     public static function createUri(array $server = []): UriInterface
      {
 -        $server += $_SERVER;
-+        $server = __cakefuzzer_array_merge($server, $_SERVER);
++        $server = __cakefuzzer_array_merge($server, $_SERVER); // CakeFuzzerInstrumentation:patched
          $server = normalizeServer($server);
          $headers = marshalHeadersFromSapi($server);
  
-@@ -242,7 +242,7 @@
-      * @param array $headers The normalized headers
-      * @return \Cake\Http\Uri A constructed Uri
-      */
--    protected static function marshalUriFromSapi(array $server, array $headers): UriInterface
-+    protected static function marshalUriFromSapi($server, $headers): UriInterface
-     {
-         /** @psalm-suppress DeprecatedFunction */
-         $uri = marshalUriFromSapi($server, $headers);
-@@ -302,7 +302,7 @@
-      * @param array $server The SERVER data to use.
-      * @return array An array containing the [baseDir, webroot]
-      */
--    protected static function getBase(UriInterface $uri, array $server): array
-+    protected static function getBase(UriInterface $uri, $server): array
-     {
-         $config = (array)Configure::read('App') + [
-             'base' => null,
