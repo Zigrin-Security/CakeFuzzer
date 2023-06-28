@@ -290,6 +290,8 @@ class AppInstrument {
         $fuzz_const = "_CAKE_FUZZER_";
         $pattern = "/${fuzz_const}[a-zA-Z0-9_]+/i";
         $inject = null;
+        $defaults = range(0,100);
+        $defaults = array_merge($defaults, array_fill(0, 200, null));
     
         preg_match_all($pattern, $path, $dynamic_parts);
     
@@ -304,7 +306,7 @@ class AppInstrument {
         $path = str_replace($inject, $selected_payload, $path);
         foreach($dynamic_parts[0] as $dyn_part) {
             if($inject !== $dyn_part) {
-                $path = str_replace($dyn_part, rand(0,100), $path); # TODO: Take this from config maybe?
+                $path = str_replace($dyn_part, $defaults[array_rand($defaults)], $path); # TODO: Take this from config maybe?
             }
         }
     

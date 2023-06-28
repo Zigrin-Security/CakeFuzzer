@@ -67,12 +67,13 @@ class VulnerabilityBuilder:
                 if "CAKEFUZZER_PAYLOAD_GUID" in match.groupdict().keys()
                 else None
             )
+            detection_location = []
             if context_location is not None:
                 locations = find_html_location(self.string, detection_result)
                 detection_location = fnmatch.filter(locations, context_location)
 
             # If the context location is not where it should be, skip it
-            if detection_location is None or detection_location == []:
+            if detection_location == []:
                 continue
 
             vulnerabilities.append(
@@ -100,7 +101,7 @@ class VulnerabilityBuilder:
 def find_html_location(
     contents: str,
     phrase: str,
-) -> None:
+) -> List[str]:
     soup = BeautifulSoup(contents, "html.parser")
     tags = []
     for tag in soup.find_all():

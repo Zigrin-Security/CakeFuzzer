@@ -128,17 +128,12 @@ class MagicPayloadDictionary implements JsonSerializable {
         // This is not supported and lacks saving payload first probably
         if(is_string($is_injectable)) return $is_injectable;
 
-        // Draw payload
-        if(is_null($this->_payloads)) {
-            $details = array(
-                'superglobal'=> $this->_superglobal_name,
-                'original' => $this->original,
-                'parameters' => $this->parameters
-            );
-            warning(array(array('error'=>'Superglobal does not have any payloads. This should not happen.', 'details'=>$details)));
-            die;
-        }
+        $payload = $this->_drawPayload();
+        $this->parameters[$key] = $payload;
+        return $payload;
+    }
 
+    protected function _drawPayload() {
         // Draw payload type
         $r = rand() % 5;
         if($this->_prefix !== '') $r = 5; // Assume prefix is only in _SERVER. No arrays there.
@@ -157,7 +152,6 @@ class MagicPayloadDictionary implements JsonSerializable {
             $payload = $this->_replaceDynamic($this->_payloads[array_rand($this->_payloads)]);
         }
 
-        $this->parameters[$key] = $payload;
         return $payload;
     }
 
@@ -253,7 +247,8 @@ class MagicPayloadDictionary implements JsonSerializable {
     }
 
     public function __toString() {
-        return $this->_superglobal_name.'_magic';
+        // return $this->_superglobal_name.'_magic';
+        return $this->_drawPayload();
     }
 }
 
