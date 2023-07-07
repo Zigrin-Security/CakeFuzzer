@@ -9,6 +9,7 @@ from database import SqliteDatabase
 GROUPS = {
     "output.first_http_line": "Response Status",
     "output.method": "Method",
+    "output._SERVER.HTTP_ACCEPT": "HTTP_ACCEPT",
 }
 
 
