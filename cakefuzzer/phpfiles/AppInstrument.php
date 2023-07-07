@@ -97,12 +97,13 @@ class AppInstrument {
 
         # Assign Accept header if not provided. TODO: Move to different part of the code.
         if(empty($_SERVER['HTTP_ACCEPT'])) {
-            $accept = array('application/json',
-                'application/xml',
-                'text/csv',
-                'text/html',
-                'text/plain'
+            $accept = array('application/json' => 20,
+                'application/xml' => 20,
+                'text/csv' => 10,
+                'text/html' => 40,
+                'text/plain' => 10
             );
+            $accept = $this->_prepareProbableArray($accept);
             $_SERVER['HTTP_ACCEPT'] = $accept[array_rand($accept)];
         }
 
@@ -319,5 +320,56 @@ class AppInstrument {
         $_SERVER["REQUEST_URI"] = $path;
         $_SERVER["QUERY_STRING"] = $path;
         return $path;
+    }
+
+    /**
+     * Prepare the array to include probabilities of choices.
+     * It's done by creating a flat array that contains more identical items
+     * of higher probability and fewer items of lower probability.
+     * 
+     * @return array
+     */
+    protected function _prepareProbableArray($array) {
+        // This should throw error instead of return empty array.
+        if(!$this->_verifyProbableArray($array)) return array();
+        
+        // First calculate GCD, then divide all probabilities by the GCD
+        $gcd = max($array);
+        foreach($array as $k=>$v) $gcd = $this->_calculateGcd($gcd, $v);
+
+        $probable_array = array();
+        foreach($array as $k=>$v) {
+        $probable_array = array_merge($probable_array, array_fill(0, $v/$gcd, $k));
+        }
+        return $probable_array;
+    }
+  
+    /**
+     * Verify if the array with probabilities is correctly formed.
+     * Check if probabilities are integer and sum of them is equal to 100
+     * 
+     * @return bool
+     */
+    protected function _verifyProbableArray($array) {
+        $sum = 0;
+        foreach($array as $k=>$v) {
+            if(!is_int($v)) return false;
+            $sum += $v;
+        }
+        return $sum === 100;
+    }
+  
+    /**
+     * Calculate greatest common division of two numbers
+     * 
+     * @return int
+     */
+    protected function _calculateGcd($a, $b) {
+        while ($b<>0) {
+        $c = $a;
+        $a = $b;
+        $b = $c%$b;
+        }
+        return $a;
     }
 }
