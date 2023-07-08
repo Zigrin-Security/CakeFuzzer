@@ -50,6 +50,7 @@ class SingleExecutorConfig(BaseModel):
     iterations: int
     PAYLOAD_GUID_phrase: str
     injectable: Optional[Dict[str, str]] = None
+    extra_app_info: Dict = None
 
 
 class IterationResult(BaseModel):
@@ -99,6 +100,7 @@ async def exec_single_executor(
             proc.communicate(input=config.json(by_alias=True).encode("utf8")),
             timeout=10.0,
         )
+
     except TimeoutError:
         print("TimeoutError while waiting for execution to finish", file=sys.stderr)
         print(f"{'Config':-^80}", file=sys.stderr)
@@ -142,6 +144,7 @@ class AttackScenario(BaseModel):
     payload: str
     total_iterations: int
     payload_guid_phrase: str
+    extra_app_info: Dict = None
     # TODO: is that even necessary once oneParamPerPayload goes away?
     injectable: Optional[Dict[str, str]] = None
 
@@ -226,6 +229,7 @@ class AttackScenario(BaseModel):
             iterations=self.total_iterations,
             injectable=self.injectable,
             PAYLOAD_GUID_phrase=self.payload_guid_phrase,
+            extra_app_info=self.extra_app_info,
         )
 
         return config

@@ -142,6 +142,16 @@ class AppInfo:
         return Path(output["app_dir"])
 
     @property
+    async def extra_app_info(self) -> Dict:
+        """
+        Call '$ app_info.php get_framework_info json'.
+        """
+        output = await self._call_app_info(["get_framework_info", "json"])
+        if "extra_app_info" in output and output["extra_app_info"]:
+            return output["extra_app_info"]
+        return []
+
+    @property
     async def users(self) -> List[str]:
         """
         Call '$ app_info.php get_users json'.

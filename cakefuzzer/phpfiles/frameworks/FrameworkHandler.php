@@ -14,6 +14,7 @@ class FrameworkHandler {
     protected $_app_framework_version = "";
     protected $_app_vars = array();
     protected $_web_root = null;
+    protected $_extra_app_info = array();
     // Manually typed Framework classes used by app_info
     public $required_classes = array();
     public $required_constants = array();
@@ -128,6 +129,13 @@ class FrameworkHandler {
     }
 
     /**
+     * Saves extra information about the application
+     */
+    public function SetExtraAppInfo($extra) {
+        $this->_extra_app_info = $extra;
+    }
+
+    /**
      * Conducts framework custom preparation before fuzzing.
      * To be overwritten by child classes
      *
@@ -174,7 +182,8 @@ class FrameworkHandler {
             'framework_path' => "",
             'framework_version' => $this->_supported_framework_version,
             'app_dir' => "",
-            'app_root_dir' => ""
+            'app_root_dir' => "",
+            'extra_app_info' => $this->_GetExtraAppInfo()
         );
         return $info;
     }
@@ -224,6 +233,14 @@ class FrameworkHandler {
             $paths[$file] = $this->_getPathsForPHPFile($file);
         }
         return $paths;
+    }
+
+    /**
+     * Get additional information about the application.
+     * If necessary this can be overwritten by the specific framework handler.
+     * This information is going to be passed in the get_framework_info app_info command.
+     */
+    protected function _GetExtraAppInfo() {
     }
 
     /**
