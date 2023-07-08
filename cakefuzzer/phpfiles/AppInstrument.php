@@ -24,6 +24,7 @@ class AppInstrument {
     private $_attack_exclude = array();
     private $_attack_skip_keys = array();
     private $_options = array();
+    private $_extra_app_info = array();
 
     public function __construct($config) {
         global $_CAKEFUZZER_PATH;
@@ -135,6 +136,9 @@ class AppInstrument {
         chdir($this->_web_root); // This is required if the app does "include './file.php'
         
         $this->_webroot_file = $config['webroot_file'];
+
+        if(!empty($config['extra_app_info'])) $this->_extra_app_info = $config['extra_app_info'];
+
         $this->initialize($payloads, $injectable, $targets, $exclude, $fuzz_skip_keys, $options);
     }
 
@@ -171,6 +175,7 @@ class AppInstrument {
 
         // Consider merging this method with AppInfo
         $this->_app_handler = $loader->getAppHandler();
+        $this->_app_handler->SetExtraAppInfo($this->_extra_app_info);
         $this->_app_handler->PrepareFuzzing(); // Prepares framework specific stuff before fuzzing
         return true;
     }

@@ -312,6 +312,7 @@ async def start_others() -> None:
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
+        extra_app_info = await app_info.extra_app_info
 
         for definition in defs:
             attacks = []
@@ -326,6 +327,7 @@ async def start_others() -> None:
                         path=path,
                         total_iterations=32,
                         payload_guid_phrase=settings.payload_guid_phrase,
+                        extra_app_info=extra_app_info,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
@@ -410,6 +412,7 @@ async def my_start_others() -> None:
         app_info = AppInfo(settings.webroot_dir)
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
+        extra_app_info = await app_info.extra_app_info
 
         for definition in defs:
             attacks = []
@@ -424,6 +427,7 @@ async def my_start_others() -> None:
                         path=path,
                         total_iterations=32,
                         payload_guid_phrase=settings.payload_guid_phrase,
+                        extra_app_info=extra_app_info,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
