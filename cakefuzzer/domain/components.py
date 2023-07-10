@@ -271,14 +271,21 @@ class VulnerabilitiesRegistry:
 
     async def get_iteration_result(self, vuln: Vulnerability) -> IterationResult:
         if vuln.iteration_result_id:
-            return await self.iteration_results.get(uid=vuln.iteration_result_id)
+            ir = await self.iteration_results.get(uid=vuln.iteration_result_id)
+
+            if vuln.payload_guid is None or vuln.payload_guid in ir.output.PAYLOAD_GUIDs:
+                return ir
+            
+            return await self.iteration_results.get_by_payload_guid(
+                payload_guid=vuln.payload_guid
+            )
 
         if vuln.payload_guid:
             return await self.iteration_results.get_by_payload_guid(
                 payload_guid=vuln.payload_guid
             )
 
-        print("Vuln None:", vuln)
+        print("Cannot join vulnerability with any iteration result:", vuln)
 
         return None
 

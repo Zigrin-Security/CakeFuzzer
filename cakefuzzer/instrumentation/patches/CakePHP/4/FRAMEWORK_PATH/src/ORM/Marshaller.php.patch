@@ -1,0 +1,31 @@
+--- Marshaller.php.orig 2023-07-10 15:30:38.502287826 +0000
++++ Marshaller.php      2023-07-10 15:32:51.557018545 +0000
+@@ -288,15 +288,15 @@
+ 
+         $tableName = $this->_table->getAlias();
+         if (isset($data[$tableName]) && is_array($data[$tableName])) {
+-            $data += $data[$tableName];
++            $data = __cakefuzzer_array_merge($data, $data[$tableName]);
+             unset($data[$tableName]);
+         }
+ 
+-        $data = new ArrayObject($data);
++        // $data = new ArrayObject($data);
+         $options = new ArrayObject($options);
+         $this->_table->dispatchEvent('Model.beforeMarshal', compact('data', 'options'));
+ 
+-        return [(array)$data, (array)$options];
++        return [$data, (array)$options];
+     }
+ 
+     /**
+@@ -560,7 +560,7 @@
+             }
+         }
+ 
+-        $errors = $this->_validate($data + $keys, $options, $isNew);
++        $errors = $this->_validate(__cakefuzzer_array_merge($data, $keys), $options, $isNew);
+         $options['isMerge'] = true;
+         $propertyMap = $this->_buildPropertyMap($data, $options);
+         $properties = [];
+
