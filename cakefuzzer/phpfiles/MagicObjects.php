@@ -260,19 +260,19 @@ class MagicPayloadDictionary implements JsonSerializable {
 
 class MagicArray extends MagicPayloadDictionary implements ArrayAccess, Iterator, Countable {
     private $_index = 0;
-    function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value) {
         return $this->checkIfNotIdenticalAndSet($offset, $value);
     }
 
-    function offsetExists($offset) {
+    public function offsetExists($offset) {
         return $this->getAndSaveForFurtherGets($offset) !== null;
     }
 
-    function offsetUnset($offset) {
+    public function offsetUnset($offset) {
         $this->original[$offset] = null;
     }
 
-    function offsetGet($offset) {
+    public function offsetGet($offset) {
         return $this->getAndSaveForFurtherGets($offset);
     }
 
@@ -281,37 +281,38 @@ class MagicArray extends MagicPayloadDictionary implements ArrayAccess, Iterator
         $copy = $this->getCopy();
         return array_keys($copy);
     }
-    function rewind() {
+    public function rewind() {
         $this->_index = 0;
     }
 
-    function current() {
+    public function current() {
         $parameters = $this->getCopy();
         $k = array_keys($parameters);
         return $parameters[$k[$this->_index]];
     }
 
-    function key() {
+    public function key() {
         $parameters = $this->getCopy();
         $k = array_keys($parameters);
+        if($this->_index >= count($k)) return null;
         return $k[$this->_index];
     }
 
-    function next() {
+    public function next() {
         $parameters = $this->getCopy();
         $k = array_keys($parameters);
         if(isset($k[++$this->_index])) return $parameters[$k[$this->_index]];
         return false;
     }
 
-    function valid() {
+    public function valid() {
         $parameters = $this->getCopy();
         $k = array_keys($parameters);
         return isset($k[$this->_index]);
     }
 
     // Countable methods. This supports count($_GET)
-    function count() {
+    public function count() {
         if($this->_prefix === '') {
             $parameters = $this->parameters;
             $original = $this->original;

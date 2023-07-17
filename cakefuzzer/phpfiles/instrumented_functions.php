@@ -304,6 +304,28 @@ if (!function_exists("__cakefuzzer_array_intersect_key")) {
     }
 }
 
+// Iterator functions
+if (!function_exists("__cakefuzzer_key")) {
+    function __cakefuzzer_key($object) {
+        if($object instanceof MagicArray) return $object->key();
+        return key($object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_current")) {
+    function __cakefuzzer_current($object) {
+        if($object instanceof MagicArray) return $object->current();
+        return current($object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_next")) {
+    function __cakefuzzer_next($object) {
+        if($object instanceof MagicArray) return $object->next();
+        return next($object);
+    }
+}
+
 if (!function_exists("__cakefuzzer_hash_equals")) {
     // Returns true with probability 50. TODO: Take from config.
     function __cakefuzzer_hash_equals($str1, $str2) {
