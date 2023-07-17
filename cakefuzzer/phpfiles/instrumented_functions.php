@@ -234,8 +234,73 @@ if (!function_exists("__cakefuzzer_array_merge")) {
 
 if (!function_exists("__cakefuzzer_array_keys")) {
     function __cakefuzzer_array_keys($object) {
-        if($object instanceof MagicArray) return array_keys($object->original + $object->parameters);
+        if($object instanceof MagicArray) return array_keys(array_merge($object->original, $object->parameters));
         return array_keys($object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_array_values")) {
+    function __cakefuzzer_array_values($object) {
+        if($object instanceof MagicArray) return array_values($object->getCopy());
+        return array_values($object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_array_unique")) {
+    function __cakefuzzer_array_unique($object) {
+        if($object instanceof MagicArray) {
+            // return array_unique(array_merge($object->original, $object->parameters));
+            $new_magic = clone $object;
+            $parameters = $new_magic->getCopy();
+            $unique_param_vals = array();
+            foreach($parameters as $key=>$val) {
+                if(!isset($unique_param_vals[$val])) $unique_param_vals[$val] = $key;
+                else $new_magic->deleteParameter($key);
+            }
+            return $new_magic;
+        }
+        return array_unique($object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_array_key_exists")) {
+    function __cakefuzzer_array_key_exists($key, $object) {
+        if($object instanceof MagicArray) return $object[$key] != null;
+        return array_key_exists($key, $object);
+    }
+}
+
+if (!function_exists("__cakefuzzer_array_intersect_key")) {
+    function __cakefuzzer_array_intersect_key($main_object, ...$objects) {
+        $noMagicArray = !($main_object instanceof MagicArray);
+        foreach($objects as $object){
+            if($object instanceof MagicArray){
+                $noMagicArray = false;
+                break;
+            }
+        }
+        if($noMagicArray) {
+            array_unshift($objects, $main_object);
+            return call_user_func_array('array_intersect_key', $objects);
+        }
+        if($main_object instanceof MagicArray) {
+            $main_copy = clone $main_object;
+            $fields_main = $main_copy->getCopy();
+        }
+        else {
+            $main_copy = $fields_main = $main_object;
+        }
+        foreach($objects as $object) {
+            if($object instanceof MagicArray) $fields = $object->getCopy();
+            else $fields = $object;
+            foreach($fields_main as $key=>$v) {
+                if(!isset($fields[$key])) {
+                    if($main_object instanceof MagicArray) $main_copy->deleteParameter($key);
+                    else unset($main_copy[$key]);
+                }
+            }
+        }
+        return $main_copy;
     }
 }
 
@@ -244,12 +309,5 @@ if (!function_exists("__cakefuzzer_hash_equals")) {
     function __cakefuzzer_hash_equals($str1, $str2) {
         $probability = 50;
         return rand() % 100 < $probability;
-    }
-}
-
-if (!function_exists("__cakefuzzer_array_key_exists")) {
-    function __cakefuzzer_array_key_exists($key, $object) {
-        if($object instanceof MagicArray) return $object[$key] != null;
-        return array_key_exists($key, $object);
     }
 }

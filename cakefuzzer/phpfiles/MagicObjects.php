@@ -212,6 +212,11 @@ class MagicPayloadDictionary implements JsonSerializable {
         return $this->__recursiveSerialize(array_merge($parameters, $original));
     }
 
+    public function deleteParameter($parameter) {
+        if(isset($this->original[$parameter])) unset($this->original[$parameter]);
+        if(isset($this->parameters[$parameter])) unset($this->parameters[$parameter]);
+    }
+
     public function isInjectable($key) {
         // Checks if the key is injectable based on the provided configuration
         if(in_array($key, $this->_skip_fuzz)) return false;
