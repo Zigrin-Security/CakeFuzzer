@@ -1,0 +1,11 @@
+--- Hash.php.orig	2023-07-18 15:15:20.163901118 +0200
++++ Hash.php	2023-07-18 15:15:40.055660494 +0200
+@@ -998,7 +998,7 @@
+ 			}
+ 			next($intersection);
+ 		}
+-		return $data + $compare;
++		return __cakefuzzer_array_merge($data, $compare);
+ 	}
+ 
+ /**

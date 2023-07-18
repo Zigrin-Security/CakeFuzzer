@@ -320,7 +320,7 @@ if (!function_exists("__cakefuzzer_current")) {
 }
 
 if (!function_exists("__cakefuzzer_next")) {
-    function __cakefuzzer_next($object) {
+    function __cakefuzzer_next(&$object) {
         if($object instanceof MagicArray) return $object->next();
         return next($object);
     }
