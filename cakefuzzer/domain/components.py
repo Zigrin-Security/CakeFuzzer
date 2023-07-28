@@ -399,22 +399,24 @@ class VulnerabilitiesRegistry:
 
             if vuln.iteration_result is None:
                 dump_vuln = {
-                    "strategy_name": None,
-                    "payload": payload,
-                    "detection_result": vuln.vulnerability.detection_result,
-                    "context_location": vuln.vulnerability.context_location,
-                    "vulnerability_location": vuln.vulnerability_location,
-                    "vulnerability_id": i,
-                    "path": None,
-                    "method": None,
-                    "superglobal": {
-                        "_GET": None,
-                        "_POST": None,
-                        "_REQUEST": None,
-                        "_COOKIE": None,
-                        "_FILES": None,
-                        "_SERVER": None,
-                    },
+                    "found_in":{
+                        "strategy_name": None,
+                        "payload": payload,
+                        "detection_result": vuln.vulnerability.detection_result,
+                        "context_location": vuln.vulnerability.context_location,
+                        "vulnerability_location": vuln.vulnerability_location,
+                        "vulnerability_id": i,
+                        "path": None,
+                        "method": None,
+                        "superglobal": {
+                            "_GET": None,
+                            "_POST": None,
+                            "_REQUEST": None,
+                            "_COOKIE": None,
+                            "_FILES": None,
+                            "_SERVER": None,
+                        },
+                    }
                 }
 
             else:
