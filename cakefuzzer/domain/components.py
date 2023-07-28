@@ -421,26 +421,7 @@ class VulnerabilitiesRegistry:
 
                 if vuln.iteration_result == vuln.found_in_iteration_result:
                     dump_vuln = {
-                        "strategy_name": vuln.iteration_result.scenario.strategy_name,
-                        "payload": payload,
-                        "detection_result": vuln.vulnerability.detection_result,
-                        "context_location": vuln.vulnerability.context_location,
-                        "vulnerability_location": vuln.vulnerability_location,
-                        "vulnerability_id": i,
-                        "path": vuln.iteration_result.output.path,
-                        "method": vuln.iteration_result.output.method,
-                        "superglobal": {
-                            "_GET": vuln.iteration_result.output.GET,
-                            "_POST": vuln.iteration_result.output.POST,
-                            "_REQUEST": vuln.iteration_result.output.REQUEST,
-                            "_COOKIE": vuln.iteration_result.output.COOKIE,
-                            "_FILES": vuln.iteration_result.output.FILES,
-                            "_SERVER": vuln.iteration_result.output.SERVER,
-                        },
-                    }
-                else:
-                    dump_vuln = {
-                        "triggered_by":{
+                        "found_in": {
                             "strategy_name": vuln.iteration_result.scenario.strategy_name,
                             "payload": payload,
                             "detection_result": vuln.vulnerability.detection_result,
@@ -457,14 +438,30 @@ class VulnerabilitiesRegistry:
                                 "_FILES": vuln.iteration_result.output.FILES,
                                 "_SERVER": vuln.iteration_result.output.SERVER,
                             },
+                        }
+                    }
+                else:
+                    dump_vuln = {
+                        "triggered_by":{
+                            "strategy_name": vuln.iteration_result.scenario.strategy_name,
+                            "payload": payload,
+                            "vulnerability_location": vuln.vulnerability_location,
+                            "vulnerability_id": i,
+                            "path": vuln.iteration_result.output.path,
+                            "method": vuln.iteration_result.output.method,
+                            "superglobal": {
+                                "_GET": vuln.iteration_result.output.GET,
+                                "_POST": vuln.iteration_result.output.POST,
+                                "_REQUEST": vuln.iteration_result.output.REQUEST,
+                                "_COOKIE": vuln.iteration_result.output.COOKIE,
+                                "_FILES": vuln.iteration_result.output.FILES,
+                                "_SERVER": vuln.iteration_result.output.SERVER,
+                            },
                         },
                         "found_in":{
                             "strategy_name": vuln.found_in_iteration_result.scenario.strategy_name,
-                            "payload": vuln.found_in_iteration_result.scenario.payload,
                             "detection_result": vuln.vulnerability.detection_result,
                             "context_location": vuln.vulnerability.context_location,
-                            "vulnerability_location": vuln.vulnerability_location,
-                            "vulnerability_id": i,
                             "path": vuln.found_in_iteration_result.output.path,
                             "method": vuln.found_in_iteration_result.output.method,
                             "superglobal": {
