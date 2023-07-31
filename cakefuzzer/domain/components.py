@@ -4,7 +4,7 @@ import time
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiofiles
 from progress.bar import Bar
@@ -212,6 +212,7 @@ async def one_param_per_payload(
 @dataclass
 class FullVulnerability:
     iteration_result: IterationResult
+    found_in_iteration_result: Optional[IterationResult]
     scanner: Scanner
     vulnerability: Vulnerability
     vulnerability_location: Tuple[str]
@@ -269,18 +270,27 @@ class VulnerabilitiesRegistry:
     iteration_results: IterationResultGet
     scanners: ScannerGet
 
-    async def get_iteration_result(self, vuln: Vulnerability) -> IterationResult:
+    async def get_iteration_result(self, vuln: Vulnerability) -> Tuple[IterationResult, IterationResult]:
         if vuln.iteration_result_id:
-            return await self.iteration_results.get(uid=vuln.iteration_result_id)
+            ir = await self.iteration_results.get(uid=vuln.iteration_result_id)
 
-        if vuln.payload_guid:
-            return await self.iteration_results.get_by_payload_guid(
+            if vuln.payload_guid is None or vuln.payload_guid in ir.output.PAYLOAD_GUIDs:
+                return ir, ir
+            
+            trigger = await self.iteration_results.get_by_payload_guid(
                 payload_guid=vuln.payload_guid
             )
+            return ir, trigger
 
-        print("Vuln None:", vuln)
+        if vuln.payload_guid:
+            trigger = await self.iteration_results.get_by_payload_guid(
+                payload_guid=vuln.payload_guid
+            )
+            return trigger, trigger
 
-        return None
+        print("Cannot join vulnerability with any iteration result:", vuln)
+
+        return None, None
 
     async def list_all(self) -> List[FullVulnerability]:
         vulns = await self.vulnerabilities.list_all()
@@ -289,18 +299,19 @@ class VulnerabilitiesRegistry:
 
         # Retrieve missing objects
         for vuln in vulns:
-            iteration_result = await self.get_iteration_result(vuln)
+            found_in, triggered_by = await self.get_iteration_result(vuln)
             scanner = await self.scanners.get(uid=vuln.scanner_id)
 
             vulnerability_location = (
                 VulnerabilitiesRegistry.find_vulnerability_location(
-                    iteration_result, vuln.payload_guid
+                    triggered_by, vuln.payload_guid
                 )
             )
 
             full_vulns.append(
                 FullVulnerability(
-                    iteration_result=iteration_result,
+                    iteration_result=triggered_by,
+                    found_in_iteration_result=found_in,
                     scanner=scanner,
                     vulnerability=vuln,
                     vulnerability_location=vulnerability_location,
@@ -388,43 +399,83 @@ class VulnerabilitiesRegistry:
 
             if vuln.iteration_result is None:
                 dump_vuln = {
-                    "strategy_name": None,
-                    "payload": payload,
-                    "detection_result": vuln.vulnerability.detection_result,
-                    "context_location": vuln.vulnerability.context_location,
-                    "vulnerability_location": vuln.vulnerability_location,
-                    "vulnerability_id": i,
-                    "path": None,
-                    "method": None,
-                    "superglobal": {
-                        "_GET": None,
-                        "_POST": None,
-                        "_REQUEST": None,
-                        "_COOKIE": None,
-                        "_FILES": None,
-                        "_SERVER": None,
-                    },
+                    "found_in":{
+                        "strategy_name": None,
+                        "payload": payload,
+                        "detection_result": vuln.vulnerability.detection_result,
+                        "context_location": vuln.vulnerability.context_location,
+                        "vulnerability_location": vuln.vulnerability_location,
+                        "vulnerability_id": i,
+                        "path": None,
+                        "method": None,
+                        "superglobal": {
+                            "_GET": None,
+                            "_POST": None,
+                            "_REQUEST": None,
+                            "_COOKIE": None,
+                            "_FILES": None,
+                            "_SERVER": None,
+                        },
+                    }
                 }
 
             else:
-                dump_vuln = {
-                    "strategy_name": vuln.iteration_result.scenario.strategy_name,
-                    "payload": payload,
-                    "detection_result": vuln.vulnerability.detection_result,
-                    "context_location": vuln.vulnerability.context_location,
-                    "vulnerability_location": vuln.vulnerability_location,
-                    "vulnerability_id": i,
-                    "path": vuln.iteration_result.output.path,
-                    "method": vuln.iteration_result.output.method,
-                    "superglobal": {
-                        "_GET": vuln.iteration_result.output.GET,
-                        "_POST": vuln.iteration_result.output.POST,
-                        "_REQUEST": vuln.iteration_result.output.REQUEST,
-                        "_COOKIE": vuln.iteration_result.output.COOKIE,
-                        "_FILES": vuln.iteration_result.output.FILES,
-                        "_SERVER": vuln.iteration_result.output.SERVER,
-                    },
-                }
+
+                if vuln.iteration_result == vuln.found_in_iteration_result:
+                    dump_vuln = {
+                        "found_in": {
+                            "strategy_name": vuln.iteration_result.scenario.strategy_name,
+                            "payload": payload,
+                            "detection_result": vuln.vulnerability.detection_result,
+                            "context_location": vuln.vulnerability.context_location,
+                            "vulnerability_location": vuln.vulnerability_location,
+                            "vulnerability_id": i,
+                            "path": vuln.iteration_result.output.path,
+                            "method": vuln.iteration_result.output.method,
+                            "superglobal": {
+                                "_GET": vuln.iteration_result.output.GET,
+                                "_POST": vuln.iteration_result.output.POST,
+                                "_REQUEST": vuln.iteration_result.output.REQUEST,
+                                "_COOKIE": vuln.iteration_result.output.COOKIE,
+                                "_FILES": vuln.iteration_result.output.FILES,
+                                "_SERVER": vuln.iteration_result.output.SERVER,
+                            },
+                        }
+                    }
+                else:
+                    dump_vuln = {
+                        "triggered_by":{
+                            "strategy_name": vuln.iteration_result.scenario.strategy_name,
+                            "payload": payload,
+                            "vulnerability_location": vuln.vulnerability_location,
+                            "vulnerability_id": i,
+                            "path": vuln.iteration_result.output.path,
+                            "method": vuln.iteration_result.output.method,
+                            "superglobal": {
+                                "_GET": vuln.iteration_result.output.GET,
+                                "_POST": vuln.iteration_result.output.POST,
+                                "_REQUEST": vuln.iteration_result.output.REQUEST,
+                                "_COOKIE": vuln.iteration_result.output.COOKIE,
+                                "_FILES": vuln.iteration_result.output.FILES,
+                                "_SERVER": vuln.iteration_result.output.SERVER,
+                            },
+                        },
+                        "found_in":{
+                            "strategy_name": vuln.found_in_iteration_result.scenario.strategy_name,
+                            "detection_result": vuln.vulnerability.detection_result,
+                            "context_location": vuln.vulnerability.context_location,
+                            "path": vuln.found_in_iteration_result.output.path,
+                            "method": vuln.found_in_iteration_result.output.method,
+                            "superglobal": {
+                                "_GET": vuln.found_in_iteration_result.output.GET,
+                                "_POST": vuln.found_in_iteration_result.output.POST,
+                                "_REQUEST": vuln.found_in_iteration_result.output.REQUEST,
+                                "_COOKIE": vuln.found_in_iteration_result.output.COOKIE,
+                                "_FILES": vuln.found_in_iteration_result.output.FILES,
+                                "_SERVER": vuln.found_in_iteration_result.output.SERVER,
+                            },
+                        }
+                    }
 
             dump_vulns.append(dump_vuln)
 

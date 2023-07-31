@@ -1,5 +1,5 @@
 {
-    "strategy_name": "RXSSAttackStrategy",
+    "strategy_name": "XSSAttackStrategy",
     "scenarios": [
         "<script>alert(\"__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__\")</script>",
         "<script>alert('__CAKEFUZZER_XSS_§CAKEFUZZER_PAYLOAD_GUID§__')</script>",

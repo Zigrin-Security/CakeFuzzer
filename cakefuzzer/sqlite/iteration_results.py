@@ -10,7 +10,42 @@ class SqliteIterationResults(SqliteDatabase):
         super().__init__(filename)
 
     async def create_tables(self) -> None:
-        return
+
+        await self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS PayloadGuids (
+                iteration_result_id INTEGER,
+                payload_guid TEXT PRIMARY KEY,
+                FOREIGN KEY (iteration_result_id) REFERENCES IterationResult(uid)
+            )
+            """
+        )
+
+        # Fetch all IterationResults
+        iteration_results = await self.conn.execute_fetchall(
+            """
+            SELECT
+                uid,
+                obj
+            FROM
+                IterationResult
+            """
+        )
+
+        for uid, obj in iteration_results:
+            iteration_result = IterationResult.parse_raw(obj)
+            
+            # Insert payload_guids into PayloadGuids table
+            for payload_guid in iteration_result.output.PAYLOAD_GUIDs:
+                await self.conn.execute(
+                    """
+                    INSERT OR IGNORE INTO PayloadGuids (iteration_result_id, payload_guid)
+                    VALUES (?, ?)
+                    """,
+                    (uid, payload_guid),
+                )
+
+        await self.conn.commit()
 
     async def get(self, uid: int) -> Optional[IterationResult]:
         rows = await self.conn.execute_fetchall(
@@ -36,18 +71,18 @@ class SqliteIterationResults(SqliteDatabase):
     async def get_by_payload_guid(self, payload_guid: str) -> Optional[IterationResult]:
         rows = await self.conn.execute_fetchall(
             """
-                SELECT
-                    uid,
-                    obj,
-                    value guid
-                FROM
-                    IterationResult ir, json_each(json_extract(ir.obj, '$.output.PAYLOAD_GUIDs'))
-                WHERE guid = ?
-            """,  # noqa: E501
+            SELECT
+                IterationResult.uid,
+                IterationResult.obj
+            FROM
+                IterationResult
+            INNER JOIN PayloadGuids ON IterationResult.uid = PayloadGuids.iteration_result_id
+            WHERE PayloadGuids.payload_guid = ?
+            """,
             (payload_guid,),
         )
 
-        iteration_results = [IterationResult.parse_raw(obj) for _, obj, guid in rows]
+        iteration_results = [IterationResult.parse_raw(obj) for _, obj in rows]
 
         if not iteration_results:
             return None
