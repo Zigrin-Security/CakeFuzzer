@@ -313,6 +313,7 @@ async def start_others() -> None:
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
         extra_app_info = await app_info.extra_app_info
+        await app_info.custom_config
 
         for definition in defs:
             attacks = []
@@ -413,6 +414,7 @@ async def my_start_others() -> None:
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
         extra_app_info = await app_info.extra_app_info
+        await app_info.custom_config
 
         for definition in defs:
             attacks = []

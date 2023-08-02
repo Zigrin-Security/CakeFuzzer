@@ -1,5 +1,7 @@
 <?php
 
+define('CAKE_FUZZER_SINGLE_EXECUTION', true);
+
 function info($message) {
     print("$message\n");
 }

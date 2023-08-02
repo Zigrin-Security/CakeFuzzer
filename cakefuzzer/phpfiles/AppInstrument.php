@@ -324,6 +324,14 @@ class AppInstrument {
         $_SERVER["PATH_INFO"] = $path;
         $_SERVER["REQUEST_URI"] = $path;
         $_SERVER["QUERY_STRING"] = $path;
+        $url = parse_url($path);
+        if(isset($url['query'])) {
+            $query = array();
+            parse_str($url['query'], $query);
+            foreach($query as $k=>$v) {
+                $_GET[$k] = $v; // This can overwrite already defined _GET parameters passed via config
+            }
+        }
         return $path;
     }
 
