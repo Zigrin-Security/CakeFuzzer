@@ -152,6 +152,16 @@ class AppInfo:
         return []
 
     @property
+    async def custom_config(self) -> Dict:
+        """
+        Call '$ app_info.php get_custom_config json'.
+        """
+        output = await self._call_app_info(["get_custom_config", "json"])
+        if not isinstance(output, list) and not isinstance(output, dict):
+            return []
+        return output
+
+    @property
     async def users(self) -> List[str]:
         """
         Call '$ app_info.php get_users json'.

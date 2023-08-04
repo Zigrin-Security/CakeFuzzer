@@ -145,6 +145,7 @@ class AttackScenario(BaseModel):
     total_iterations: int
     payload_guid_phrase: str
     extra_app_info: Dict = None
+    custom_config: Dict = None
     # TODO: is that even necessary once oneParamPerPayload goes away?
     injectable: Optional[Dict[str, str]] = None
 
@@ -169,61 +170,16 @@ class AttackScenario(BaseModel):
             strategy_name=self.strategy_name,
             # 'includes': self.getInstrumentation('App').getIncludesList()  # TODO?
             path=self.path,
-            super_globals=SuperGlobalsConfig(
-                _SERVER={
-                    # "PATH_INFO": self.path,
-                    # "REQUEST_URI": self.path,
-                    # "QUERY_STRING": self.path,
-                    # "REQUEST_METHOD": self.method,
-                    "HTTP_HOST": "127.0.0.1",
-                    "HTTP_SEC_FETCH_SITE": "same-origin",
-                }
-            ),
+            super_globals=SuperGlobalsConfig(_SERVER={}),
             payloads=[self.payload],
             global_targets=[],  # TODO: implement
             global_exclude=[],  # TODO: Implement
             fuzz_skip_keys=SkipFuzzingKeysConfig(
-                _SERVER=[
-                    "HTTP_CONTENT_ENCODING",
-                    "HTTP_X_HTTP_METHOD_OVERRIDE",
-                    "HTTP_AUTHORIZATION",
-                ],
-                _GET=[
-                    "_GET",
-                    "_POST",
-                    "_SERVER",
-                    "_COOKIE",
-                    "_FILES",
-                    "_ENV",
-                    "GLOBALS",
-                ],
-                _POST=[
-                    "_GET",
-                    "_POST",
-                    "_SERVER",
-                    "_COOKIE",
-                    "_FILES",
-                    "_ENV",
-                    "GLOBALS",
-                ],
-                _COOKIE=[
-                    "_GET",
-                    "_POST",
-                    "_SERVER",
-                    "_COOKIE",
-                    "_FILES",
-                    "_ENV",
-                    "GLOBALS",
-                ],
-                _FILES=[
-                    "_GET",
-                    "_POST",
-                    "_SERVER",
-                    "_COOKIE",
-                    "_FILES",
-                    "_ENV",
-                    "GLOBALS",
-                ],
+                _SERVER=[],
+                _GET=[],
+                _POST=[],
+                _COOKIE=[],
+                _FILES=[],
             ),  # TODO: extract?
             oneParamPerPayload=False,  # TODO: Config
             iterations=self.total_iterations,
@@ -231,7 +187,55 @@ class AttackScenario(BaseModel):
             PAYLOAD_GUID_phrase=self.payload_guid_phrase,
             extra_app_info=self.extra_app_info,
         )
+        config = self.apply_custom_config(config)
 
+        return config
+
+    def apply_custom_config(self, config: SingleExecutorConfig):
+        config = config.dict(by_alias=True)
+        to_overwrite = (
+            "super_globals",
+            "global_targets",
+            "global_exclude",
+            "fuzz_skip_keys",
+        )
+
+        self.custom_config = {
+            main_field: val
+            for main_field, val in self.custom_config.items()
+            if main_field in to_overwrite
+        }
+        # Update config based on the custom framework requirements passed by app_info
+        for main_field in self.custom_config:
+            for sub_field in self.custom_config[main_field]:
+                if sub_field in config[main_field]:
+                    # If the type doesn't match, just skip.
+                    if type(config[main_field][sub_field]) != type(
+                        self.custom_config[main_field][sub_field]
+                    ):
+                        print(
+                            f"Custom & default config[{main_field}][{sub_field}] type mismatch. Default type: {type(config[main_field][sub_field])} != Custom type: {type(self.custom_config[main_field][sub_field])}. Skipping."
+                        )
+                        continue
+                    if isinstance(config[main_field][sub_field], list):
+                        config[main_field][sub_field].extend(
+                            v
+                            for v in self.custom_config[main_field][sub_field]
+                            if v not in config[main_field][sub_field]
+                        )
+                        pass
+                    elif isinstance(config[main_field][sub_field], dict):
+                        for final_field in self.custom_config[main_field][sub_field]:
+                            config[main_field][sub_field][
+                                final_field
+                            ] = self.custom_config[main_field][sub_field][final_field]
+                else:
+                    config[main_field][sub_field] = self.custom_config[main_field][
+                        sub_field
+                    ]
+                pass
+
+        config = SingleExecutorConfig.parse_obj(config)
         return config
 
     @property

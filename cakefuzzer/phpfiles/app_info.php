@@ -1,5 +1,7 @@
 <?php
 
+define('CAKE_FUZZER_APP_INFO', true);
+
 include 'AppInfo.php';
 $appInfo = new AppInfo();
 

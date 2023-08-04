@@ -2,8 +2,9 @@
 class FrameworkHandler {
     public $executed = false;
     public $available_commands = array(
-        'get_framework_info'=>'_GetFrameworkInfoCommand',
-        'get_paths'=>'_GetPathsCommand',
+        'get_framework_info' => '_GetFrameworkInfoCommand',
+        'get_custom_config' => '_GetCustomConfigCommand',
+        'get_paths' => '_GetPathsCommand',
         'get_log_paths' => '_GetLogPathsCommand',
         'get_users' => '_GetUsersCommand',
         'get_db_info' => '_GetDBInfoCommand'
@@ -186,6 +187,16 @@ class FrameworkHandler {
             'extra_app_info' => $this->_GetExtraAppInfo()
         );
         return $info;
+    }
+
+    /**
+     * Get config elements custom for specific framework.
+     * To be overwritten by the child class if necessary.
+     * 
+     * @return array
+     */
+    protected function _GetCustomConfigCommand() {
+        return array();
     }
 
     /**

@@ -7,6 +7,7 @@ class WebrootSettings(BaseSettings):
     webroot_dir: Path
     storage_path: Path = Path("databases")
     concurrent_queues: int = 10
+    iterations: int = 32
     only_paths_with_prefix: str = "/"
     exclude_paths: str = ""
     payload_guid_phrase = "§CAKEFUZZER_PAYLOAD_GUID§"

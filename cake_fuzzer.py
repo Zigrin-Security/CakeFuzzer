@@ -313,6 +313,7 @@ async def start_others() -> None:
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
         extra_app_info = await app_info.extra_app_info
+        custom_config = await app_info.custom_config
 
         for definition in defs:
             attacks = []
@@ -325,9 +326,10 @@ async def start_others() -> None:
                         strategy_name=definition.strategy_name,
                         payload=payload,
                         path=path,
-                        total_iterations=32,
+                        total_iterations=settings.iterations,
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
+                        custom_config=custom_config,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
@@ -413,6 +415,7 @@ async def my_start_others() -> None:
         log_paths = await app_info.log_paths
         framework_handler = await app_info.framework_handler
         extra_app_info = await app_info.extra_app_info
+        custom_config = await app_info.custom_config
 
         for definition in defs:
             attacks = []
@@ -425,9 +428,10 @@ async def my_start_others() -> None:
                         strategy_name=definition.strategy_name,
                         payload=payload,
                         path=path,
-                        total_iterations=32,
+                        total_iterations=settings.iterations,
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
+                        custom_config=custom_config,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
