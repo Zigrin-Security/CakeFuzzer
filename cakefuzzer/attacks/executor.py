@@ -170,21 +170,12 @@ class AttackScenario(BaseModel):
             strategy_name=self.strategy_name,
             # 'includes': self.getInstrumentation('App').getIncludesList()  # TODO?
             path=self.path,
-            super_globals=SuperGlobalsConfig(
-                _SERVER={
-                    "HTTP_HOST": "127.0.0.1",
-                    "HTTP_SEC_FETCH_SITE": "same-origin",
-                }
-            ),
+            super_globals=SuperGlobalsConfig(_SERVER={}),
             payloads=[self.payload],
             global_targets=[],  # TODO: implement
             global_exclude=[],  # TODO: Implement
             fuzz_skip_keys=SkipFuzzingKeysConfig(
-                _SERVER=[
-                    "HTTP_CONTENT_ENCODING",
-                    "HTTP_X_HTTP_METHOD_OVERRIDE",
-                    "HTTP_AUTHORIZATION",
-                ],
+                _SERVER=[],
                 _GET=[],
                 _POST=[],
                 _COOKIE=[],

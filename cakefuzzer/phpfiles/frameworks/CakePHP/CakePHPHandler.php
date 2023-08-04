@@ -64,6 +64,23 @@ class CakePHPHandler extends FrameworkHandler{
         return $info;
     }
 
+    /**
+     * Get config elements custom for specific framework.
+     * 
+     * @return array
+     */
+    protected function _GetCustomConfigCommand() {
+        $super_globals = array('_SERVER' => array('HTTP_HOST' => '127.0.0.1', 'HTTP_SEC_FETCH_SITE' => 'same-origin'));
+
+        $fuzz_skip_keys = array(
+            '_SERVER' => array('HTTP_CONTENT_ENCODING', 'HTTP_X_HTTP_METHOD_OVERRIDE', 'HTTP_AUTHORIZATION')
+        );
+        return array(
+            'super_globals' => $super_globals,
+            'fuzz_skip_keys' => $fuzz_skip_keys
+        );
+    }
+
     protected function _getPathsForPHPFile($file) {
         if(basename($file) === "index.php") {
             $result = array();
