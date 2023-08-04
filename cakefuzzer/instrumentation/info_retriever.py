@@ -157,7 +157,7 @@ class AppInfo:
         Call '$ app_info.php get_custom_config json'.
         """
         output = await self._call_app_info(["get_custom_config", "json"])
-        if not isinstance(output, list) or not isinstance(output, dict):
+        if not isinstance(output, list) and not isinstance(output, dict):
             return []
         return output
 
