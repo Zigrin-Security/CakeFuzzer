@@ -1,0 +1,11 @@
+--- IntegerType.php.orig        2023-08-21 10:52:43.572394857 +0000
++++ IntegerType.php     2023-08-21 11:04:48.266180380 +0000
+@@ -36,7 +36,7 @@
+      */
+     protected function checkNumeric($value): void
+     {
+-        if (!is_numeric($value)) {
++        if (!is_numeric($value) && false) { // CakeFuzzerInstrumentation
+             throw new InvalidArgumentException(sprintf(
+                 'Cannot convert value of type `%s` to integer',
+                 getTypeName($value)

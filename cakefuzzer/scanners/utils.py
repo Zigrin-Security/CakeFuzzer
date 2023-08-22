@@ -30,8 +30,6 @@ class VulnerabilityBuilder:
 
         if self.payload_guid_phrase in self.phrase:
             if self.phrase not in REGEX_CACHE:
-                print("building regex")
-
                 parts = self.phrase.split(self.payload_guid_phrase)
                 # We have to assume that the rest of the phrase is correct regex.
                 # Therefore no re.escape for the part 0 and 1
@@ -72,9 +70,9 @@ class VulnerabilityBuilder:
                 locations = find_html_location(self.string, detection_result)
                 detection_location = fnmatch.filter(locations, context_location)
 
-            # If the context location is not where it should be, skip it
-            if detection_location == []:
-                continue
+                # If the context location is not where it should be, skip it
+                if detection_location == []:
+                    continue
 
             vulnerabilities.append(
                 Vulnerability(

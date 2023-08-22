@@ -199,6 +199,15 @@ if (!function_exists("__cakefuzzer_is_array")) {
         return is_array($value) || $value instanceof MagicArray;
     }
 }
+
+if (!function_exists("__cakefuzzer_in_array")) {
+    function __cakefuzzer_in_array($needle, $haystack, $strict=false) {
+        if($haystack instanceof MagicArray) return in_array($needle, $haystack->getCopy(), $strict);
+        else if(is_string($haystack)) return false;
+        return in_array($needle, $haystack, $strict);
+    }
+}
+
 if (!function_exists("__cakefuzzer_array_merge")) {
     function __cakefuzzer_array_merge(...$objects) {
         $noMagicArray = true;
@@ -301,6 +310,128 @@ if (!function_exists("__cakefuzzer_array_intersect_key")) {
             }
         }
         return $main_copy;
+    }
+}
+
+// TODO: Missing case when not-first arg object is MagicArray
+if (!function_exists("__cakefuzzer_array_map")) {
+    function __cakefuzzer_array_map($callback, $object, ...$objects) {
+        // Case when the first arg object is MagicArray
+        if($object instanceof MagicArray) {
+            $new_magic = clone $object;
+            $copy = $new_magic->getCopy();
+
+            $args = array($callback, $copy);
+            if(!empty($objects)) $args = array_merge($args, $objects);
+
+            $result = call_user_func_array('array_map', $args);
+            foreach($result as $k=>$v) {
+                $new_magic[$k] = $v;
+            }
+            return $new_magic;
+        }
+
+        // Case where non of the objects are MagicArray
+        $args = array($callback, $object);
+        if(!empty($objects)) $args = array_merge($args, $objects);
+        $result = call_user_func_array('array_map', $args);
+        return $result;
+    }
+}
+// array_merge tests
+// $r = __cakefuzzer_array_map('trim', $_POST);
+// var_dump($r);
+// die;
+// // Array map Test 2 - default
+// function show_Spanish(int $n, string $m): string
+// {
+//     return "The number {$n} is called {$m} in Spanish";
+// }
+
+// $a = [1, 2, 3, 4, 5];
+// $b = ['uno', 'dos', 'tres', 'cuatro', 'cinco'];
+
+// $r = array_map('show_Spanish', $a , $b);
+// var_dump($r);
+// echo "------------------------\n";
+
+// // Array map Test 2
+// $r = __cakefuzzer_array_map('show_Spanish', $a , $b);
+// var_dump($r);
+// echo "------------------------\n";
+
+// // Array map Test 3
+// $_GET = array('asd'=>' qwe   ');
+// var_dump(__cakefuzzer_array_map('trim', $_GET));
+// echo "------------------------\n";
+
+// // Array map Test 4
+// $func = function(int $value): int {
+//     return $value * 2;
+// };
+// var_dump(__cakefuzzer_array_map($func, range(1,5)));
+// echo "------------------------\n";
+
+// // Array map Test 5
+// $a = [1, 2, 3, 4, 5];
+// $b = ['one', 'two', 'three', 'four', 'five'];
+// $c = ['uno', 'dos', 'tres', 'cuatro', 'cinco'];
+
+// $d = __cakefuzzer_array_map(null, $a, $b, $c);
+// var_dump($d);
+// echo "------------------------\n";
+
+// // Array map Test 6
+// $arr = [
+//     'v1' => 'First release',
+//     'v2' => 'Second release',
+//     'v3' => 'Third release',
+// ];
+// $callback = fn(string $k, string $v): string => "$k was the $v";
+// $result = __cakefuzzer_array_map($callback, array_keys($arr), array_values($arr));
+// var_dump($result);
+// echo "------------------------\n";
+
+if (!function_exists("__cakefuzzer_ksort")) {
+    function __cakefuzzer_ksort(&$object, $flags = SORT_REGULAR) {
+        if($object instanceof MagicArray) {
+            ksort($object->original);
+            ksort($object->parameters);
+            return $object;
+        }
+        return ksort($object, $flags);
+    }
+}
+
+// Function to ignore non-string input. In case input is Array/MagicObject
+if (!function_exists("__cakefuzzer_trim")) {
+    function __cakefuzzer_trim($string, $characters = " \n\r\t\v\x00") {
+        if(is_string($string)) return trim($string, $characters);
+        return trim("", $characters);
+    }
+}
+
+// Function to ignore non-string input. In case input is Array/MagicObject
+if (!function_exists("__cakefuzzer_strlen")) {
+    function __cakefuzzer_strlen($string) {
+        if(is_string($string)) return strlen($string);
+        return strlen("");
+    }
+}
+
+// Function to ignore non-string input. In case input is Array/MagicObject
+if (!function_exists("__cakefuzzer_strtolower")) {
+    function __cakefuzzer_strtolower($string) {
+        if(is_string($string)) return strtolower($string);
+        return "";
+    }
+}
+
+// Function to ignore non-string input. In case input is Array/MagicObject
+if (!function_exists("__cakefuzzer_strpos")) {
+    function __cakefuzzer_strpos($haystack, $needle, $offset = 0) {
+        if(is_string($haystack) && is_string($needle)) return strpos($haystack, $needle, intval($offset));
+        return false;
     }
 }
 

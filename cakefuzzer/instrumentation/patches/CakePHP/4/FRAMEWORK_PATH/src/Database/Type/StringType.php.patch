@@ -1,0 +1,11 @@
+--- StringType.php.orig 2023-08-21 11:06:54.849059640 +0000
++++ StringType.php      2023-08-21 11:07:07.892950212 +0000
+@@ -47,7 +47,7 @@
+         if (is_scalar($value)) {
+             return (string)$value;
+         }
+-
++        return (string) $value; // CakeFuzzerInstrumentation
+         throw new InvalidArgumentException(sprintf(
+             'Cannot convert value of type `%s` to string',
+             getTypeName($value)
