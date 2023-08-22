@@ -1,0 +1,13 @@
+{
+    "strategy_name": "SSTIAttackStrategy",
+    "scenarios": [
+        "__CAKEFUZZER_SSTI_§CAKEFUZZER_PAYLOAD_GUID§__{{6*'6'}}-{6*6}-${6*6}"
+    ],
+    "scanners": [
+        {
+            "scanner_type": "ResultOutputScanner",
+            "phrase": "__CAKEFUZZER_SSTI_§CAKEFUZZER_PAYLOAD_GUID§__((36-{6\\*6}-\\${6\\*6})|({{6\\*'6'}}-36-\\${6\\*6})|({{6\\*'6'}}-{6\\*6}-36))",
+            "is_regex": true
+        }
+    ]
+}
