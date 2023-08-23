@@ -5,14 +5,24 @@
   ],
   "scanners": [
     {
-        "scanner_type": "LogFilesContentsScanner",
-        "phrase": "(?i)warning: (include|require)(|_once)\\(\\): Failed opening 'https://ckj3rhp6gki70dk3mfiy782uvnnitr92\\.§CAKEFUZZER_PAYLOAD_GUID§\\.local\\/[^']*'",
-        "is_regex": true
+      "scanner_type": "LogFilesContentsScanner",
+      "phrase": "(?i)warning: (include|require)(|_once)\\(\\): Failed opening 'https://ckj3rhp6gki70dk3mfiy782uvnnitr92\\.§CAKEFUZZER_PAYLOAD_GUID§\\.local\\/[^']*'",
+      "is_regex": true
     },
     {
       "scanner_type": "ResultErrorsScanner",
       "phrase": "(?i)warning: (include|require)(|_once)\\(\\): Failed opening 'https://ckj3rhp6gki70dk3mfiy782uvnnitr92\\.§CAKEFUZZER_PAYLOAD_GUID§\\.local\\/[^']*'",
       "is_regex": true
+    },
+    {
+      "scanner_type": "LogFilesContentsScanner",
+      "phrase": "(?i)error: \\[Error\\] Failed opening required 'https://ckj3rhp6gki70dk3mfiy782uvnnitr92\\.§CAKEFUZZER_PAYLOAD_GUID§\\.local\/[^']*'",
+      "is_regex": true
+    },
+    {
+      "scanner_type": "ResultErrorsScanner",
+      "phrase": "(?i)error: \\[Error\\] Failed opening required 'https://ckj3rhp6gki70dk3mfiy782uvnnitr92\\.§CAKEFUZZER_PAYLOAD_GUID§\\.local\/[^']*'",
+      "is_regex": true
     }
   ]
-} 
+}
