@@ -37,6 +37,7 @@ class MagicPayloadDictionary implements JsonSerializable {
     protected $_global_probability = null;
     protected $_injected = null;
     protected $_payload_types = array();
+    protected $_string_representation = null;
     public $original = null;
     public $parameters = null;
     public function __construct(
@@ -135,14 +136,14 @@ class MagicPayloadDictionary implements JsonSerializable {
 
     protected function _drawPayload() {
         // Draw payload type
-        $r = rand() % 5;
-        if($this->_prefix !== '') $r = 5; // Assume prefix is only in _SERVER. No arrays there.
+        $r = rand() % 10;
+        if($this->_prefix !== '') $r = 10; // Assume prefix is only in _SERVER. No arrays there.
 
         if ($r == 0) {
             $payload = new MagicArrayOrObject("sub_array", "", array(), $this->_payloads, $this->_injectable, $this->_skip_fuzz, $this->_options, $this->_payload_types, $this->_global_probability);
-        } else if ($r == 1) {
-            $payload = array($this->_replaceDynamic($this->_payloads[array_rand($this->_payloads)]));
         } else if ($r == 2) {
+            $payload = array($this->_replaceDynamic($this->_payloads[array_rand($this->_payloads)]));
+        } else if ($r == 4) {
             $sub_key = $this->_payloads[array_rand($this->_payloads)];
             $sub_key = $this->_replaceDynamic($sub_key);
             $sub_val = $this->_payloads[array_rand($this->_payloads)];
@@ -157,7 +158,9 @@ class MagicPayloadDictionary implements JsonSerializable {
 
     public function checkIfNotIdenticalAndSet($offset, $value) {
         if($value === $this) $value = clone $value;
-        $this->original[$offset] = $value;
+
+        if(!($value instanceof MagicArray) && isset($this->parameters[$offset])) $this->parameters[$offset] = $value;
+        else $this->original[$offset] = $value;
         return $value;
     }
 
@@ -252,8 +255,9 @@ class MagicPayloadDictionary implements JsonSerializable {
     }
 
     public function __toString() {
-        // return $this->_superglobal_name.'_magic';
-        return $this->_drawPayload();
+        $value = $this->_replaceDynamic($this->_payloads[array_rand($this->_payloads)]);
+        $this->_string_representation = $value;
+        return $value;
     }
 }
 

@@ -1,0 +1,29 @@
+--- NumericPaginator.php.orig   2023-08-21 18:02:30.792349923 +0000
++++ NumericPaginator.php        2023-08-21 18:04:46.304155275 +0000
+@@ -244,7 +244,7 @@
+         $options = $this->validateSort($object, $options);
+         $options = $this->checkLimit($options);
+ 
+-        $options += ['page' => 1, 'scope' => null];
++        $options = __cakefuzzer_array_merge($options, ['page' => 1, 'scope' => null]);
+         $options['page'] = (int)$options['page'] < 1 ? 1 : (int)$options['page'];
+         [$finder, $options] = $this->_extractFinder($options);
+ 
+@@ -392,7 +392,7 @@
+         unset($options['finder'], $options['maxLimit']);
+ 
+         if (is_array($type)) {
+-            $options = (array)current($type) + $options;
++            $options = __cakefuzzer_array_merge(current($type), $options);
+             $type = key($type);
+         }
+ 
+@@ -552,7 +552,7 @@
+                 $order = $this->_removeAliases($order, $object->getAlias());
+             }
+ 
+-            $options['order'] = [$options['sort'] => $direction] + $order;
++            $options['order'] = __cakefuzzer_array_merge([$options['sort'] => $direction], $order);
+         } else {
+             $options['sort'] = null;
+         }

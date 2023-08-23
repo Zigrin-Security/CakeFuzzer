@@ -1,0 +1,11 @@
+--- ModuleNode.php.orig 2023-08-21 13:17:49.335233870 +0000
++++ ModuleNode.php.patched      2023-08-21 13:18:45.603662667 +0000
+@@ -303,7 +303,7 @@
+     protected function compileDisplay(Compiler $compiler)
+     {
+         $compiler
+-            ->write("protected function doDisplay(array \$context, array \$blocks = [])\n", "{\n")
++            ->write("protected function doDisplay(\$context, \$blocks = [])\n", "{\n")
+             ->indent()
+             ->write("\$macros = \$this->macros;\n")
+             ->subcompile($this->getNode('display_start'))
