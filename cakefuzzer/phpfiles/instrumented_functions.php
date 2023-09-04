@@ -171,13 +171,6 @@ if(!isset($_CakeFuzzerPayloadGUIDs)) $_CakeFuzzerPayloadGUIDs = new CakeFuzzerPa
 if(!isset($_CakeFuzzerTimer)) $_CakeFuzzerTimer = new CakeFuzzerTimer(true);
 if(!isset($_CakeFuzzerFuzzedObjects)) $_CakeFuzzerFuzzedObjects = new CakeFuzzerObjectsRegistry();
 
-if(!function_exists('__cakefuzzer_header')) {
-    function __cakefuzzer_header($header, $replace = true, $response_code = 0) {
-        global $_CakeFuzzerResponseHeaders;
-        $_CakeFuzzerResponseHeaders->AddHeader($header, $replace, $response_code);
-        header($header, $replace, $response_code);
-    }
-}
 if (!function_exists("__cakefuzzer_is_magic_in_arrays")) {
     function __cakefuzzer_is_magic_in_arrays(...$objects) {
         foreach($objects as $object) {
@@ -191,6 +184,14 @@ if (!function_exists("__cakefuzzer_is_magic_in_arrays")) {
             }
         }
         return false;
+    }
+}
+
+if(!function_exists('__cakefuzzer_header')) {
+    function __cakefuzzer_header($header, $replace = true, $response_code = 0) {
+        global $_CakeFuzzerResponseHeaders;
+        $_CakeFuzzerResponseHeaders->AddHeader($header, $replace, $response_code);
+        header($header, $replace, $response_code);
     }
 }
 
