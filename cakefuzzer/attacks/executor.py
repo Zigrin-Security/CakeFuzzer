@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import sys
+import time
 from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
@@ -81,6 +82,7 @@ class IterationResult(BaseModel):
 
     scenario: "AttackScenario"
     iteration: int
+    start_time: float
     output: SingleExecutorOutput
     errors: SingleExecutorErrors
 
@@ -254,6 +256,7 @@ class AttackScenario(BaseModel):
         return IterationResult(
             scenario=self,
             iteration=iteration,
+            start_time=time.time(),
             output=output,
             errors=errors,
         )
