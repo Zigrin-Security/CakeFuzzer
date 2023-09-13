@@ -330,6 +330,7 @@ async def start_others() -> None:
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
                         custom_config=custom_config,
+                        iteration_delay=settings.iteration_delay,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
@@ -432,6 +433,7 @@ async def my_start_others() -> None:
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
                         custom_config=custom_config,
+                        iteration_delay=settings.iteration_delay,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]

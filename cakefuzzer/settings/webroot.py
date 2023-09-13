@@ -12,6 +12,7 @@ class WebrootSettings(BaseSettings):
     exclude_paths: str = ""
     payload_guid_phrase = "§CAKEFUZZER_PAYLOAD_GUID§"
     instrumentation_ini = Path("config/instrumentation.ini")
+    iteration_delay: float = 0
 
     class Config:
         env_file = "config/config.ini"

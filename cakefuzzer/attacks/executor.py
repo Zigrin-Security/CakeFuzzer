@@ -150,6 +150,7 @@ class AttackScenario(BaseModel):
     custom_config: Dict = None
     # TODO: is that even necessary once oneParamPerPayload goes away?
     injectable: Optional[Dict[str, str]] = None
+    iteration_delay: float = 0
 
     @property
     def scenario_id(self) -> int:
@@ -251,6 +252,9 @@ class AttackScenario(BaseModel):
         return list(set(unfuzzable + skip_keys))
 
     async def execute_once(self, iteration: int) -> IterationResult:
+        if self.iteration_delay:
+            print(f"Waiting: {self.iteration_delay}")
+            await asyncio.sleep(self.iteration_delay)
         output, errors = await exec_single_executor(self.config)
 
         return IterationResult(
