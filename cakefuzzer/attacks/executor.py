@@ -253,8 +253,7 @@ class AttackScenario(BaseModel):
 
     async def execute_once(self, iteration: int) -> IterationResult:
         if self.iteration_delay:
-            print(f"Waiting: {self.iteration_delay}")
-            await asyncio.sleep(self.iteration_delay)
+            time.sleep(self.iteration_delay)
         output, errors = await exec_single_executor(self.config)
 
         return IterationResult(
