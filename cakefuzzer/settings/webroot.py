@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from pydantic import BaseSettings
 
@@ -9,7 +10,7 @@ class WebrootSettings(BaseSettings):
     concurrent_queues: int = 10
     iterations: int = 32
     only_paths_with_prefix: str = "/"
-    exclude_paths: str = ""
+    exclude_paths: List[str] = ""
     payload_guid_phrase = "§CAKEFUZZER_PAYLOAD_GUID§"
     instrumentation_ini = Path("config/instrumentation.ini")
     iteration_delay: float = 0

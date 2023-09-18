@@ -8,6 +8,18 @@ Cake Fuzzer is a project that is meant to help automatically and continuously di
 
 If you would like to learn more about the research process check out this article series: [CakePHP Application Cybersecurity Research](https://zigrin.com/cakephp-application-cybersecurity-research-white-box-penetration-testing-in-action/)
 
+# 🏆 Bugs reported 🏆
+Below is a list of some of the bugs discovered by Cake Fuzzer:
+Title | Severity | Link
+--- | --- | ---
+Blind SQL injection in Cerebrate | 9.8 Critical | https://zigrin.com/advisories/cerebrate-blind-sql-injection/
+SQL injection in CRUD component | 8.8 High | https://zigrin.com/advisories/misp-sql-injection-in-crud-component/
+DOM-based XSS | 6.1 Medium | https://zigrin.com/advisories/misp-dom-based-xss/
+Blind SQL injection in order parameter | 8.8 High | XXX
+Blind SQL injection in array input parameters | 8.8 High | XXX
+Time-based SQL injection in /Logs/index | 7.2 High | XXX
+
+
 # Project goals
 Typical approaches to discovering vulnerabilities using automated tools in web applications are:
 - Static Application Security Testing (SAST) – Method that involves a scanner detecting vulnerabilities based on the source code without running the application
