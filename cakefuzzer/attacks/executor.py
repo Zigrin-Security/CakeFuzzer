@@ -91,7 +91,7 @@ async def exec_single_executor(
     config: SingleExecutorConfig,
 ) -> Tuple[SingleExecutorOutput, SingleExecutorErrors]:
     proc = await asyncio.create_subprocess_exec(
-        *["php", "cakefuzzer/phpfiles/single_execution.php"],
+        *["php", "cakefuzzer/phpfiles/single_execution.php", config.path],
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
