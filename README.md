@@ -105,7 +105,8 @@ sudo apt update
 sudo apt-get -y install open-vm-tools open-vm-tools-desktop
 sudo apt-get -y install build-essential module-assistant linux-headers-virtual linux-image-virtual && sudo dpkg-reconfigure open-vm-tools
 sudo mkdir /cake_fuzzer # Note: This path is fixed as it's hardcoded in the instrumentation (one of the patches)
-sudo vmhgfs-fuse .host:/cake_fuzzer /cake_fuzzer -o allow_other -o uid=1000
+sudo vmhgfs-fuse .host:/cake_fuzzer /cake_fuzzer -o allow_other -o uid=1000 -o max_write=61440
+# max_write fixes weird file copy bug: https://github.com/vmware/open-vm-tools/issues/437#issuecomment-669663891
 ls -l /cake_fuzzer # If everything went fine you should see content of the Cake Fuzzer directory from your host OS. Any changes on your host OS will be reflected inside the VM and vice-versa.
 ```
 
