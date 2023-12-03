@@ -35,7 +35,7 @@ class AppInfo:
         """
         make a call to the php script app_info.php.
         """
-        command = ["php", str(self.script_path), str(self.webroot) + "/", *params]
+        command = ["php", str(self.script_path), *params]
         # output = subprocess.check_output(command).decode()
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -140,6 +140,14 @@ class AppInfo:
         """
         output = await self._call_app_info(["get_framework_info", "json"])
         return Path(output["app_dir"])
+
+    @property
+    async def php_ini(self) -> Path:
+        """
+        Call '$ app_info.php get_framework_info json'.
+        """
+        output = await self._call_app_info(["get_framework_info", "json"])
+        return Path(output["php_ini"])
 
     @property
     async def extra_app_info(self) -> Dict:

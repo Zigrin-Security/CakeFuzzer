@@ -5,6 +5,7 @@ from typing import List
 from cakefuzzer.instrumentation import Instrumentation, apply, check, revert
 from cakefuzzer.instrumentation.copy import CopyInstrumentation
 from cakefuzzer.instrumentation.info_retriever import AppInfo
+from cakefuzzer.instrumentation.ini_update import IniUpdateInstrumentation
 from cakefuzzer.instrumentation.patch import PatchInstrumentation
 from cakefuzzer.settings import load_webroot_settings
 from cakefuzzer.settings.instrumentation import InstrumentationSettings
@@ -118,6 +119,13 @@ class Instrumentator:
 
         return copies
 
+    async def _load_ini_updates(self) -> List[IniUpdateInstrumentation]:
+        app_info = AppInfo(self.webroot_dir)
+        ini_instrumentation = IniUpdateInstrumentation(
+            ini_file_name=await app_info.php_ini, rules=self.settings.php_ini_rules
+        )
+        return [ini_instrumentation]
+
     async def _load_instrumentations(self):
         await self._load_settings()
 
@@ -134,11 +142,14 @@ class Instrumentator:
         framework_patches = await self._load_framework_version_patches(major_version)
         framework_copies = await self._load_framework_version_copies(major_version)
 
+        ini_updates = await self._load_ini_updates()
+
         return (
             fcall_renames,
             settings_patches + framework_patches,
             settings_copies + framework_copies,
             annotations_removal,
+            ini_updates,
         )
 
     async def apply(self) -> None:
@@ -147,6 +158,7 @@ class Instrumentator:
             patches,
             copies,
             annotation_removal,
+            ini_updates,
         ) = await self._load_instrumentations()
 
         _, unapplied = await check(*patches)
@@ -165,12 +177,17 @@ class Instrumentator:
         unapplied = await apply(*unapplied)
         print("Annotations Removed", len(unapplied))
 
+        _, unapplied = await check(*ini_updates)
+        unapplied = await apply(*unapplied)
+        print("php.ini updates applied", len(unapplied))
+
     async def revert(self) -> None:
         (
             frenames,
             patches,
             copies,
             annotation_removal,
+            ini_updates,
         ) = await self._load_instrumentations()
 
         applied, unapplied = await check(*annotation_removal)
@@ -189,12 +206,17 @@ class Instrumentator:
         await revert(*applied)
         print("Copies Reverted", len(applied))
 
+        applied, _ = await check(*ini_updates)
+        await revert(*applied)
+        print("php.ini updates reverted", len(applied))
+
     async def is_applied(self) -> None:
         (
             frenames,
             patches,
             copies,
             annotation_removal,
+            ini_updates,
         ) = await self._load_instrumentations()
 
         applied, unapplied = await check(*frenames)
@@ -209,3 +231,6 @@ class Instrumentator:
 
         applied, unapplied = await check(*annotation_removal)
         print(f"Annotations: x/{len(applied) + len(unapplied)}")
+
+        applied, unapplied = await check(*ini_updates)
+        print(f"php.ini updates: x/{len(applied) + len(unapplied)}")
