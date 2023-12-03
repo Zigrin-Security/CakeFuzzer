@@ -60,7 +60,8 @@ class CakePHPHandler extends FrameworkHandler{
             'framework_path' => CORE_PATH,
             'app_dir' => $app_dir,
             'app_root_dir' => ROOT,
-            'php_ini' => php_ini_loaded_file()
+            'php_ini' => php_ini_loaded_file(),
+            'extra_app_info' => $this->_GetExtraAppInfo()
         );
         return $info;
     }

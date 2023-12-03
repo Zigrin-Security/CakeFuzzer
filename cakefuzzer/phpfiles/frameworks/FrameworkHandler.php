@@ -253,6 +253,7 @@ class FrameworkHandler {
      * This information is going to be passed in the get_framework_info app_info command.
      */
     protected function _GetExtraAppInfo() {
+        return null;
     }
 
     /**
