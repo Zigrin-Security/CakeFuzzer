@@ -15,9 +15,9 @@ Title | Severity | Link
 Blind SQL injection in Cerebrate | 9.8 Critical | https://zigrin.com/advisories/cerebrate-blind-sql-injection/
 SQL injection in CRUD component | 8.8 High | https://zigrin.com/advisories/misp-sql-injection-in-crud-component/
 DOM-based XSS | 6.1 Medium | https://zigrin.com/advisories/misp-dom-based-xss/
-Blind SQL injection in order parameter | 8.8 High | XXX
-Blind SQL injection in array input parameters | 8.8 High | XXX
-Time-based SQL injection in /Logs/index | 7.2 High | XXX
+Blind SQL injection in order parameter | 8.8 High | https://zigrin.com/advisories/misp-blind-sql-injection-in-order-parameter/
+Blind SQL injection in array input parameters | 8.8 High | https://zigrin.com/advisories/misp-blind-sql-injection-in-array-input-parameters/
+Time-based SQL injection in /Logs/index | 7.2 High | https://zigrin.com/advisories/misp-time-based-sql-injection-in-logs-index/
 
 
 # Project goals
