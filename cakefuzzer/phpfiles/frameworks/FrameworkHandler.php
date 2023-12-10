@@ -184,6 +184,7 @@ class FrameworkHandler {
             'framework_version' => $this->_supported_framework_version,
             'app_dir' => "",
             'app_root_dir' => "",
+            'php_ini' => php_ini_loaded_file(),
             'extra_app_info' => $this->_GetExtraAppInfo()
         );
         return $info;
@@ -252,6 +253,7 @@ class FrameworkHandler {
      * This information is going to be passed in the get_framework_info app_info command.
      */
     protected function _GetExtraAppInfo() {
+        return null;
     }
 
     /**
@@ -275,6 +277,15 @@ class FrameworkHandler {
         $property_reflection = $object_reflection->getProperty($property);
         $property_reflection->setAccessible(true);
         return $property_reflection->getValue($object);
+    }
+
+    protected function _getObjectPropertyValue($object, $property) {
+        // https://medium.com/docler-engineering/how-to-access-a-private-property-of-any-object-in-php-asap-afa55987d445
+        include realpath(dirname(__FILE__).'/../libraries/php-reflection/src/Reflection.php');
+        $reflection = new \Ivastly\PhpReflection\Reflection();
+        $value = $reflection->getProperty($object, $property);
+        // $visibility = $reflection->getVisibility($object, $property);
+        return $value;
     }
 
     private function _searchFilesInDir($directory, $extension) {

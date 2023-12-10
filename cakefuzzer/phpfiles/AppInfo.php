@@ -10,15 +10,18 @@ class AppInfo {
 
     public function loadInput() {
         // if(!$this->_loadAppHandler()) return false; // this requires to include the target app first
-        if(count($_SERVER['argv']) < 3) return false;
-        if(!in_array($_SERVER['argv'][2], $this->_GetAvailableCommands())) {
-            $this->_info("Command '{$_SERVER['argv'][2]}' not found.");
+        if(count($_SERVER['argv']) < 2) return false;
+        if(!in_array($_SERVER['argv'][1], $this->_GetAvailableCommands())) {
+            $this->_info("Command '{$_SERVER['argv'][1]}' not found.");
             return false;
         }
 
+        // Load config
+        $config = $this->loadConfig();
+
         // Parse index
-        $this->_index_path = $this->_getIndex($_SERVER['argv'][1]);
-        $this->_web_root = $_SERVER['argv'][1];
+        $this->_index_path = $this->_getIndex($config['WEBROOT_DIR']);
+        $this->_web_root = $config['WEBROOT_DIR'];
         if(!is_dir($this->_web_root)) {
             $this->_info($this->_web_root." was not found");
             return false;
@@ -28,19 +31,29 @@ class AppInfo {
 
         // Parse output format
         $this->_output_format = "json";
-        if(count($_SERVER['argv']) > 3 && in_array($_SERVER['argv'][3], $this->_GetAvailableFormats())) {
-            $this->_output_format = $_SERVER['argv'][3];
+        if(count($_SERVER['argv']) > 2 && in_array($_SERVER['argv'][2], $this->_GetAvailableFormats())) {
+            $this->_output_format = $_SERVER['argv'][2];
         }
-        $this->_command = $_SERVER['argv'][2];
+        $this->_command = $_SERVER['argv'][1];
 
         return true;
     }
 
+    private function loadConfig() {
+        $config_path = realpath(dirname(__FILE__) . "/../../config/config.ini");
+        $result = parse_ini_file($config_path);
+        return $result;
+    }
+
     public function printHelp() {
-        $this->_info("Usage: php {$_SERVER['argv'][0]} path/to/cakephp/app/webroot <commad> [output_format]");
+        $this->_info("Usage: php {$_SERVER['argv'][0]} <commad> [output_format]");
         $this->_info(" Available actions: ".implode(", ", $this->_GetAvailableCommands()));
         $this->_info(" Available output formats: ".implode(", ", $this->_GetAvailableFormats()));
-        $this->_info("Example: php app_info.php /var/www/MISP/app/webroot/ get_controllers raw");
+        $this->_info("Example: php app_info.php get_controllers raw");
+    }
+
+    public function prepareGlobals() {
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     }
 
     public function getIndex() {
@@ -59,6 +72,7 @@ class AppInfo {
         if($this->_loadAppHandler()) {
             $x = func_get_args();
             $result = $this->_app_handler->CommandHandler($x);
+            $output = ob_get_clean();
             print($this->_FormatResponse($result, $this->_output_format));
         }
         if(count($x)) exit($x[0]);

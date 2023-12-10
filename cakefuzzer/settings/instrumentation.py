@@ -5,6 +5,7 @@ from typing import List
 from pydantic import BaseSettings
 
 from cakefuzzer.instrumentation.copy import CopyInstrumentation
+from cakefuzzer.instrumentation.ini_update import IniEntry
 from cakefuzzer.instrumentation.override import FunctionCallRenameInstrumentation
 from cakefuzzer.instrumentation.patch import PatchInstrumentation
 from cakefuzzer.instrumentation.remove_annotations import (
@@ -22,4 +23,5 @@ class InstrumentationSettings(BaseSettings):
     copies: List[CopyInstrumentation] = []
     fcall_renames: List[FunctionCallRenameInstrumentation] = []
     remove_annotations: List[RemoveAnnotationsInstrumentation] = []
+    php_ini_rules: List[IniEntry] = []
     concurrent_limit: int = 100

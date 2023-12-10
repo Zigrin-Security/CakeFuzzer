@@ -4,6 +4,7 @@ aiofiles==22.1.0
 pydantic==1.10.0
 python-dotenv==0.21.0
 aiosqlite==0.17.0
+aioshutil
 persist-queue==0.8.0
 progress==1.6
 scapy==2.5.0

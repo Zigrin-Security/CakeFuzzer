@@ -10,6 +10,8 @@ if(!$appInfo->loadInput()) {
     die;
 }
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+
 function exception_handler(Throwable $exception) {
     // echo "Uncaught exception: " , $exception->getMessage(), "\n";
 }
@@ -30,6 +32,7 @@ set_exception_handler('exception_handler');
 ob_start();
 ob_start();
 ob_start();
+$appInfo->prepareGlobals();
 include $appInfo->getIndex();
 $output = ob_get_clean();
 while(ob_get_level()) $output .= ob_get_clean();
