@@ -129,7 +129,7 @@ ob_start();
 
 unset($data, $config);
 
-error_reporting(-1);
+error_reporting(E_ALL & ~(E_DEPRECATED | E_USER_DEPRECATED | E_STRICT));
 ini_set('display_errors', 'On');
 include $_CAKEFUZZER_INSTRUMENTOR->getWebRootFile();
 $_CAKEFUZZER_INSTRUMENTOR->handleExit(); // If app did not run exit/die then run it manually

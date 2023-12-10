@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import sys
+import time
 from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
@@ -81,6 +82,7 @@ class IterationResult(BaseModel):
 
     scenario: "AttackScenario"
     iteration: int
+    start_time: float
     output: SingleExecutorOutput
     errors: SingleExecutorErrors
 
@@ -89,7 +91,7 @@ async def exec_single_executor(
     config: SingleExecutorConfig,
 ) -> Tuple[SingleExecutorOutput, SingleExecutorErrors]:
     proc = await asyncio.create_subprocess_exec(
-        *["php", "cakefuzzer/phpfiles/single_execution.php"],
+        *["php", "cakefuzzer/phpfiles/single_execution.php", config.path],
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -148,6 +150,7 @@ class AttackScenario(BaseModel):
     custom_config: Dict = None
     # TODO: is that even necessary once oneParamPerPayload goes away?
     injectable: Optional[Dict[str, str]] = None
+    iteration_delay: float = 0
 
     @property
     def scenario_id(self) -> int:
@@ -249,11 +252,14 @@ class AttackScenario(BaseModel):
         return list(set(unfuzzable + skip_keys))
 
     async def execute_once(self, iteration: int) -> IterationResult:
+        if self.iteration_delay:
+            time.sleep(self.iteration_delay)
         output, errors = await exec_single_executor(self.config)
 
         return IterationResult(
             scenario=self,
             iteration=iteration,
+            start_time=time.time(),
             output=output,
             errors=errors,
         )

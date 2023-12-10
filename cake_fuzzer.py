@@ -52,17 +52,25 @@ def limit_paths_to_prefix(
     return new_paths
 
 
-def exclude_paths(paths: Dict[str, List[str]], pattern: str) -> Dict[str, List[str]]:
+def exclude_paths(
+    paths: Dict[str, List[str]], patterns: List[str]
+) -> Dict[str, List[str]]:
     """
-    Exclude paths that match regular expression pattern.
+    Exclude paths that match regular expression patterns.
     If the pattern is empty, no paths are excluded.
     """
-    if pattern == "":
+    if len(patterns) == 0:
         return paths
     limited_paths = {}
     for file in paths:
         for path in paths[file]:
-            if re.search(pattern, path, re.IGNORECASE) is None:
+            exclude = False
+            for pattern in patterns:
+                if re.search(pattern, path, re.IGNORECASE) is not None:
+                    exclude = True
+                    break
+
+            if not exclude:
                 if file in limited_paths:
                     limited_paths[file].append(path)
                 else:
@@ -85,18 +93,18 @@ def add_fuzzable_actions(actions):
 
 
 async def compute_paths(
-    webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
+    webroot: Path, only_paths_with_prefix: str, exclude_patterns: List[str]
 ) -> Dict[str, List[str]]:
     app_info = AppInfo(webroot)
     paths = await app_info.paths
 
     paths = limit_paths_to_prefix(paths, prefix=only_paths_with_prefix)
-    paths = exclude_paths(paths, exclude_pattern)
+    paths = exclude_paths(paths, exclude_patterns)
     return paths
 
 
 async def compute_paths_old(
-    webroot: Path, only_paths_with_prefix: str, exclude_pattern: str
+    webroot: Path, only_paths_with_prefix: str, exclude_patterns: str
 ) -> List[str]:
     app_info = AppInfo(webroot)
     # regexes = await app_info.routes
@@ -130,7 +138,7 @@ async def compute_paths_old(
     computed_routes = limit_paths_to_prefix(
         computed_routes, prefix=only_paths_with_prefix
     )  # return computed_routes
-    computed_routes = exclude_paths(computed_routes, exclude_pattern)
+    computed_routes = exclude_paths(computed_routes, exclude_patterns)
     return computed_routes
 
 
@@ -302,7 +310,7 @@ async def start_others() -> None:
         paths = await compute_paths(
             webroot=settings.webroot_dir,
             only_paths_with_prefix=settings.only_paths_with_prefix,
-            exclude_pattern=settings.exclude_paths,
+            exclude_patterns=settings.exclude_paths,
         )
         total_paths = sum(len(paths[php_file]) for php_file in paths)
         print(
@@ -330,6 +338,7 @@ async def start_others() -> None:
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
                         custom_config=custom_config,
+                        iteration_delay=settings.iteration_delay,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
@@ -404,7 +413,7 @@ async def my_start_others() -> None:
         paths = await compute_paths(
             webroot=settings.webroot_dir,
             only_paths_with_prefix=settings.only_paths_with_prefix,
-            exclude_pattern=settings.exclude_paths,
+            exclude_patterns=settings.exclude_paths,
         )
         total_paths = sum(len(paths[php_file]) for php_file in paths)
         print(
@@ -432,6 +441,7 @@ async def my_start_others() -> None:
                         payload_guid_phrase=settings.payload_guid_phrase,
                         extra_app_info=extra_app_info,
                         custom_config=custom_config,
+                        iteration_delay=settings.iteration_delay,
                     )
                     for payload, path in itertools.product(
                         definition.scenarios, paths[php_file]
