@@ -53,7 +53,7 @@ else
 fi
 
 info "Detecting installed python"
-python_paths="$(whereis -b python3 | grep -Eo '[^ ]+/python3\.[0-9]+' | grep -Fv python3.11 | sort -ur)"
+python_paths="$(whereis -b python3 | grep -Eo '[^ ]+/python3(\.[0-9]+)?' | grep -Fv python3.11 | sort -ur)"
 python_path=""
 while IFS= read -r path; do
     if [ -f "$path" ]; then
@@ -61,12 +61,12 @@ while IFS= read -r path; do
         break;
     fi
 done <<< "$python_paths"
-python_bin_name=$(echo $python_path | grep -Eo 'python3\.[0-9]+')
+python_bin_name=$(echo $python_path | grep -Eo 'python3(\.[0-9]+)?')
 
 # Adding to install if not exists
 if [ -z "$python_bin_name" ]; then
     # Get latest version of python 3 available in the repository
-    python_bin_name=$($pkg_mgr search python3 2>/dev/null| grep -Eo 'python3\.?[0-9]+' | grep -Fv python3.11 | sort -u | tail -n 1)
+    python_bin_name=$($pkg_mgr search python3 2>/dev/null| grep -Eo 'python3\.?[0-9]+' | grep -Fv python3.11 | grep -Fv python3.34 | sort -u | tail -n 1)
     commands+=($python_bin_name)
 fi
 
@@ -78,7 +78,7 @@ for command in "${commands[@]}"; do
 done
 
 # Detecting python version
-python_version=$(echo $python_bin_name | grep -Eo '[0-9]+\.?[0-9]+')
+python_version=$($python_bin_name -V | grep -Eo '[0-9]+\.?[0-9]+')
 if [ "${python_version:1:1}" = "." ]; then
     python_minor_version="${python_version:2}"
 else
@@ -111,12 +111,12 @@ pip_name=pip$python_version
 cd /cake_fuzzer
 info "Preparing virtual environment"
 $pip_name install -q --upgrade virtualenv
-virtualenv -q -p $python_bin_name venv
+virtualenv -q -p $python_bin_name .venv
 if [ ! -e venv ]; then
     info "Run venv"
-    $python_bin_name -m venv venv
+    $python_bin_name -m venv .venv
 fi
-source venv/bin/activate
+source .venv/bin/activate
 
 $pip_name install -qr requirements.txt
 

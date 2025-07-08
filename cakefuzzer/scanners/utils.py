@@ -33,7 +33,7 @@ class VulnerabilityBuilder:
                 parts = self.phrase.split(self.payload_guid_phrase)
                 # We have to assume that the rest of the phrase is correct regex.
                 # Therefore no re.escape for the part 0 and 1
-                regex = f"({parts[0]})(?P<CAKEFUZZER_PAYLOAD_GUID>[0-9]+)({parts[1]})"
+                regex = f"{parts[0]}(?P<CAKEFUZZER_PAYLOAD_GUID>[0-9]+)({parts[1]})"
 
                 REGEX_CACHE[self.phrase] = re.compile(regex, flags=re.DOTALL)
 

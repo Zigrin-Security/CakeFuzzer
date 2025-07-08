@@ -29,9 +29,9 @@ class IniUpdateInstrumentation(BaseModel):
             for rule in self.rules:
                 commands.append("-e")
                 commands.append(
-                    "s@;*\s*"
+                    r"s@;*\s*"
                     + rule.setting_name
-                    + "\s*=\s*.*$@"
+                    + r"\s*=\s*.*$@"
                     + rule.setting_name
                     + " = "
                     + rule.setting_value
