@@ -78,7 +78,7 @@ for command in "${commands[@]}"; do
 done
 
 # Detecting python version
-python_version=$($python_bin_name -V | grep -Eo '[0-9]+\.?[0-9]+')
+python_version=$($python_bin_name -V | grep -Eo '3\.?[0-9]+')
 if [ "${python_version:1:1}" = "." ]; then
     python_minor_version="${python_version:2}"
 else
