@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Download the PHP-Parser library
-curl -Lso php-parser.zip https://github.com/nikic/PHP-Parser/archive/refs/heads/master.zip
+if [ ! -f php-parser.zip ]; then
+    curl -Lso php-parser.zip https://github.com/nikic/PHP-Parser/archive/refs/heads/master.zip
+fi
 
 # Extract the downloaded zip archive
 unzip php-parser.zip
