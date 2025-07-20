@@ -60,3 +60,7 @@ docs/_build/
 
 # php-parser
 php-parser/
+
+# Database
+database-*
+databases-*
