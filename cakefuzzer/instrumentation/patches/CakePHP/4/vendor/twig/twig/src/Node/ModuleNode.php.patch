@@ -4,7 +4,7 @@
      protected function compileDisplay(Compiler $compiler)
      {
          $compiler
--            ->write("protected function doDisplay(array \$context, array \$blocks = [])\n", "{\n")
+-            ->write("protected function doDisplay(array \$context, array \$blocks = []): iterable\n", "{\n")
 +            ->write("protected function doDisplay(\$context, \$blocks = [])\n", "{\n")
              ->indent()
              ->write("\$macros = \$this->macros;\n")
