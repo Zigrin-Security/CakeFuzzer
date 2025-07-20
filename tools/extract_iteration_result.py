@@ -22,19 +22,53 @@ class VulnExtractor:
         if not vulnerability:
             return False
 
-        if vulnerability["strategy_name"] == "RXSSAttackStrategy":
+        # triggered_by = self.get_triggered_by(vulnerability)
+        found_in = self.get_found_in(vulnerability)
+
+        # if triggered_by and triggered_by["strategy_name"] == "RXSSAttackStrategy":
+        #     return await self.database.get_iteration_by_field(
+        #         "output.output", triggered_by["detection_result"]
+        #     )
+
+        if found_in and found_in["strategy_name"] == "RXSSAttackStrategy":
             return await self.database.get_iteration_by_field(
-                "output.output", vulnerability["detection_result"]
+                "output.output", found_in["detection_result"]
             )
 
         return False
 
     def get_vulnerability(self, vulns, vuln_id):
         for vuln in vulns:
-            if vuln_id == vuln["vulnerability_id"]:
+            vid = None
+            if (
+                "triggered_by" in vuln
+                and isinstance(vuln["triggered_by"], dict)
+                and "vulnerability_id" in vuln["triggered_by"]
+            ):
+                vid = vuln["triggered_by"]["vulnerability_id"]
+            elif (
+                "found_in" in vuln
+                and isinstance(vuln["found_in"], dict)
+                and "vulnerability_id" in vuln["found_in"]
+            ):
+                vid = vuln["found_in"]["vulnerability_id"]
+            else:
+                return False
+
+            if vuln_id == vid:
                 return vuln
 
         return False
+
+    def get_triggered_by(self, vuln):
+        if "triggered_by" in vuln and isinstance(vuln["triggered_by"], dict):
+            return vuln["triggered_by"]
+        return None
+
+    def get_found_in(self, vuln):
+        if "found_in" in vuln and isinstance(vuln["found_in"], dict):
+            return vuln["found_in"]
+        return None
 
 
 async def main():
